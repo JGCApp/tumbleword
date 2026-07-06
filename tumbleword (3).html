@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tumbleword — a free letter-grid word game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#ff6b6b;
+  --bg2:#8854d0;
+  --bg3:#00c2c7;
+  --card:#fffaf2;
+  --ink:#332a55;
+  --ink-soft:#6b5f8f;
+  --pink:#ff5c8d;
+  --orange:#ff9f43;
+  --yellow:#ffd93d;
+  --green:#4ecb71;
+  --blue:#4d96ff;
+  --purple:#a06bff;
+  --teal:#00c2c7;
+  --red:#ff5252;
+  --white:#ffffff;
+}
+*{box-sizing:border-box;-webkit-touch-callout:none;}
+html,body{margin:0;padding:0;}
+body{
+  background:linear-gradient(150deg, var(--bg1) 0%, var(--bg2) 55%, var(--bg3) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  font-family:'Nunito','Trebuchet MS',sans-serif;
+  color:var(--ink);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:28px 16px 60px;
+}
+.wrap{width:100%;max-width:640px;}
+header{text-align:center;margin-bottom:18px;}
+h1{
+  font-family:'Baloo 2','Trebuchet MS',sans-serif;
+  font-weight:800;
+  letter-spacing:2px;
+  font-size:2.4rem;
+  margin:0 0 4px;
+  color:#fff;
+  text-shadow:0 3px 0 rgba(0,0,0,0.15), 0 6px 14px rgba(0,0,0,0.2);
+}
+.tagline{
+  font-size:0.9rem;
+  color:#fff;
+  letter-spacing:0.3px;
+  font-weight:700;
+  opacity:0.92;
+  text-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+.mode-toggle{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin:18px 0 14px;
+}
+.mode-btn{
+  font-family:'Baloo 2',inherit;
+  font-size:0.95rem;
+  padding:9px 20px;
+  border-radius:20px;
+  border:2px solid rgba(255,255,255,0.6);
+  background:rgba(255,255,255,0.18);
+  color:#fff;
+  cursor:pointer;
+  transition:all .15s ease;
+  letter-spacing:0.3px;
+  font-weight:700;
+}
+.mode-btn.active{
+  background:var(--white);
+  color:var(--pink);
+  border-color:var(--white);
+}
+.hud{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:var(--card);
+  border-radius:16px;
+  padding:12px 18px;
+  margin-bottom:16px;
+  font-family:'Baloo 2',sans-serif;
+  box-shadow:0 6px 16px rgba(0,0,0,0.18);
+}
+.hud-item{text-align:center;}
+.hud-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);font-weight:700;}
+.hud-value{font-size:1.5rem;font-weight:800;color:var(--purple);}
+#hud-time{color:var(--orange);}
+#hud-score{color:var(--pink);}
+#hud-words{color:var(--teal);}
+.hud-value.warn{color:var(--red) !important;}
+
+.target-banner{
+  background:var(--card);
+  border:3px dashed var(--yellow);
+  border-radius:14px;
+  padding:12px 14px;
+  margin-bottom:16px;
+  text-align:center;
+  font-size:0.9rem;
+  color:var(--ink);
+  font-family:'Nunito',sans-serif;
+  font-weight:700;
+  box-shadow:0 6px 16px rgba(0,0,0,0.15);
+}
+.target-banner b{color:var(--pink);letter-spacing:1px;}
+.target-banner .sub{display:block;font-size:0.72rem;opacity:0.75;margin-top:6px;font-style:italic;font-weight:400;}
+.target-banner.solved{
+  border-color:var(--green);
+  border-style:solid;
+}
+.blank-pattern{
+  font-family:'Courier New',monospace;
+  letter-spacing:4px;
+  font-size:1.15rem;
+  margin:8px 0;
+  color:var(--ink);
+  font-weight:700;
+}
+.hint-btn{
+  font-size:0.72rem !important;
+  padding:6px 14px !important;
+  margin-top:2px;
+}
+.hint-text{
+  margin-top:8px;
+  font-size:0.8rem;
+  font-style:italic;
+  color:var(--ink-soft);
+  font-weight:400;
+}
+.choice-buttons{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(30,20,50,0.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  padding:20px;
+}
+.modal-card{
+  background:var(--card);
+  border-radius:20px;
+  padding:20px;
+  max-width:360px;
+  width:100%;
+  box-shadow:0 12px 32px rgba(0,0,0,0.35);
+}
+.cal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+  font-family:'Baloo 2',sans-serif;
+}
+.cal-month-label{font-weight:800;font-size:1.1rem;color:var(--ink);}
+.cal-nav-btn{padding:6px 12px !important;font-size:1rem !important;}
+.cal-nav-btn:disabled{opacity:0.3;cursor:default;}
+.cal-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:5px;
+}
+.cal-weekday{
+  text-align:center;
+  font-family:'Baloo 2',sans-serif;
+  font-size:0.68rem;
+  color:var(--ink-soft);
+  font-weight:700;
+  padding-bottom:2px;
+}
+.cal-day{
+  aspect-ratio:1;
+  border-radius:8px;
+  border:none;
+  background:#f1eee7;
+  color:var(--ink);
+  font-family:'Nunito',sans-serif;
+  font-weight:700;
+  font-size:0.8rem;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  padding:0;
+}
+.cal-day.today{box-shadow:0 0 0 2px var(--purple);}
+.cal-day.done{background:linear-gradient(135deg,#fff6d9,#ffe9a8);}
+.cal-day.disabled{opacity:0.25;cursor:default;}
+.cal-star{font-size:0.7rem;line-height:1;margin-top:1px;}
+.cal-legend{
+  margin-top:10px;
+  font-size:0.75rem;
+  color:var(--ink-soft);
+  text-align:center;
+}
+
+#board{
+  position:relative;
+  background:var(--card);
+  border-radius:22px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 10px 24px rgba(0,0,0,0.2);
+}
+#tiles-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  user-select:none;
+  touch-action:none;
+  position:relative;
+  --board-rotate:0deg;
+  --counter-rotate:0deg;
+  transform:rotate(var(--board-rotate));
+  transition:transform .5s cubic-bezier(.4,0,.2,1);
+}
+.rotate-btn{
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:20;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:none;
+  background:var(--card);
+  color:var(--purple);
+  font-size:1.2rem;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,0.25);
+  transition:transform .5s cubic-bezier(.4,0,.2,1);
+}
+.rotate-btn:active{transform:scale(0.9);}
+#trail-svg{
+  position:absolute;
+  top:16px;left:16px;right:16px;bottom:16px;
+  width:calc(100% - 32px);
+  height:calc(100% - 32px);
+  pointer-events:none;
+  z-index:5;
+}
+.board-popup{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0.6);
+  opacity:0;
+  pointer-events:none;
+  z-index:30;
+  font-family:'Baloo 2',sans-serif;
+  font-weight:800;
+  font-size:1.5rem;
+  color:#fff;
+  text-align:center;
+  white-space:nowrap;
+  background:linear-gradient(135deg, var(--pink), var(--purple));
+  padding:12px 26px;
+  border-radius:18px;
+  box-shadow:0 10px 26px rgba(0,0,0,0.35);
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1), opacity .22s ease;
+}
+.board-popup.show{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+}
+.board-popup .popup-sub{
+  font-size:1.1rem;
+  margin-top:2px;
+}
+.tile{
+  aspect-ratio:1;
+  border-radius:50%;
+  background:#ffffff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Baloo 2','Trebuchet MS',sans-serif;
+  font-weight:800;
+  font-size:2.35rem;
+  color:var(--ink);
+  box-shadow:0 4px 0 rgba(0,0,0,0.15), 0 6px 10px rgba(0,0,0,0.2);
+  cursor:pointer;
+  transform:rotate(var(--counter-rotate));
+  transition:transform .5s cubic-bezier(.4,0,.2,1), box-shadow .08s ease;
+  position:relative;
+}
+.tile.selected{
+  box-shadow:0 0 0 4px #fff, 0 2px 6px rgba(0,0,0,0.25);
+  transform:rotate(var(--counter-rotate)) scale(1.08);
+}
+.tile.selected.valid{
+  box-shadow:0 0 0 4px var(--green), 0 0 18px 4px rgba(78,203,113,0.7);
+  transform:rotate(var(--counter-rotate)) scale(1.1);
+}
+.tile .qu{font-size:1.4rem;}
+
+.current-word{
+  text-align:center;
+  min-height:2rem;
+  font-size:1.4rem;
+  letter-spacing:3px;
+  font-weight:800;
+  margin-bottom:12px;
+  color:var(--white);
+  font-family:'Baloo 2',sans-serif;
+  text-shadow:0 2px 6px rgba(0,0,0,0.25);
+  transition:color .1s ease;
+}
+.current-word.valid{color:var(--green);}
+
+.actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-bottom:20px;
+}
+.btn{
+  font-family:'Baloo 2',sans-serif;
+  font-size:0.9rem;
+  padding:10px 20px;
+  border-radius:12px;
+  border:none;
+  background:linear-gradient(135deg, var(--pink), var(--orange));
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  letter-spacing:0.3px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+.btn.secondary{
+  background:var(--card);
+  border:2px solid rgba(255,255,255,0.6);
+  color:var(--purple);
+}
+.btn:active{transform:translateY(1px);}
+
+.hud-hint-btn{
+  font-family:'Baloo 2',sans-serif;
+  font-size:0.85rem;
+  font-weight:800;
+  border:none;
+  border-radius:10px;
+  padding:6px 12px;
+  background:linear-gradient(135deg, var(--purple), var(--pink));
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 3px 8px rgba(0,0,0,0.2);
+}
+.hud-hint-btn:active{transform:translateY(1px);}
+
+.words-section{
+  background:var(--card);
+  border-radius:16px;
+  padding:14px 16px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.15);
+  margin-bottom:16px;
+}
+.words-title{
+  font-family:'Baloo 2',sans-serif;
+  font-size:0.8rem;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:var(--ink-soft);
+  margin-bottom:10px;
+  font-weight:700;
+}
+.word-board{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(84px,1fr));
+  gap:14px;
+  align-items:start;
+}
+.len-col{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+.donut{
+  width:56px;
+  height:56px;
+}
+.donut-bg{
+  fill:none;
+  stroke:rgba(51,42,85,0.12);
+  stroke-width:3;
+}
+.donut-fill{
+  fill:none;
+  stroke-width:3;
+  stroke-linecap:round;
+  transition:stroke-dasharray .3s ease;
+}
+.donut-text{
+  font-family:'Baloo 2',sans-serif;
+  font-size:0.5rem;
+  font-weight:800;
+  fill:var(--ink);
+  text-anchor:middle;
+  dominant-baseline:middle;
+}
+.len-col-label{
+  font-family:'Baloo 2',sans-serif;
+  font-size:0.65rem;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  color:var(--ink-soft);
+  font-weight:700;
+}
+.len-col-words{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  width:100%;
+}
+.chip{
+  border:none;
+  border-radius:10px;
+  padding:4px 10px;
+  font-size:0.76rem;
+  font-family:'Nunito',sans-serif;
+  color:#fff;
+  background:linear-gradient(135deg, var(--teal), #2fa5aa);
+  text-align:center;
+  word-break:break-word;
+  font-weight:700;
+  cursor:pointer;
+  width:100%;
+}
+.chip:active{transform:translateY(1px);}
+.chip.bonus{
+  background:linear-gradient(135deg, var(--pink), var(--purple)) !important;
+  font-weight:800;
+  box-shadow:0 0 0 2px var(--yellow);
+}
+.empty-note{
+  font-size:0.85rem;
+  color:var(--ink-soft);
+  font-style:italic;
+  grid-column:1 / -1;
+}
+.empty-note-small{
+  font-size:0.68rem;
+  color:var(--ink-soft);
+  opacity:0.6;
+  font-style:italic;
+}
+
+.word-def-card{max-width:320px;}
+.word-def-title{
+  font-family:'Baloo 2',sans-serif;
+  font-weight:800;
+  font-size:1.25rem;
+  color:var(--pink);
+  text-align:center;
+  margin-bottom:10px;
+  letter-spacing:1px;
+}
+.word-def-body{
+  font-size:0.9rem;
+  color:var(--ink);
+  text-align:center;
+  line-height:1.4;
+}
+
+.archive-row{
+  display:flex;
+  justify-content:center;
+  margin-bottom:16px;
+}
+.hints-section{
+  background:var(--card);
+  border-radius:16px;
+  padding:14px 16px;
+  margin-bottom:16px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.15);
+}
+.hints-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+  flex-wrap:wrap;
+  gap:8px;
+}
+#hint-credits-label{
+  font-family:'Nunito',sans-serif;
+  font-size:0.75rem;
+  font-weight:800;
+}
+.hint-entry{
+  background:rgba(255,217,61,0.18);
+  border:2px solid var(--yellow);
+  border-radius:10px;
+  padding:8px 12px;
+  margin-bottom:6px;
+}
+.hint-pattern{
+  font-family:'Courier New',monospace;
+  letter-spacing:3px;
+  font-weight:700;
+  font-size:1rem;
+  color:var(--ink);
+}
+.hint-def{
+  font-size:0.8rem;
+  color:var(--ink-soft);
+  font-style:italic;
+  margin-top:4px;
+}
+.toast{
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:linear-gradient(135deg, var(--purple), var(--pink));
+  color:#fff;
+  padding:11px 22px;
+  border-radius:14px;
+  font-family:'Baloo 2',sans-serif;
+  font-size:0.9rem;
+  font-weight:700;
+  opacity:0;
+  transition:all .25s ease;
+  pointer-events:none;
+  z-index:50;
+  box-shadow:0 6px 18px rgba(0,0,0,0.3);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+footer{
+  margin-top:26px;
+  text-align:center;
+  font-size:0.75rem;
+  color:rgba(255,255,255,0.75);
+  max-width:440px;
+  font-weight:600;
+  text-shadow:0 1px 3px rgba(0,0,0,0.15);
+}
+@media (max-width:420px){
+  .tile{font-size:1.9rem;}
+  h1{font-size:1.9rem;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>TUMBLEWORD</h1>
+    <div class="tagline">for the Weiser couple &#128521;</div>
+  </header>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="mode-classic">Classic</button>
+    <button class="mode-btn" id="mode-daily">Daily Puzzle</button>
+  </div>
+
+  <div id="calendar-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <div class="cal-header">
+        <button class="btn secondary cal-nav-btn" id="cal-prev" type="button">&lsaquo;</button>
+        <div id="cal-month-label" class="cal-month-label"></div>
+        <button class="btn secondary cal-nav-btn" id="cal-next" type="button">&rsaquo;</button>
+      </div>
+      <div id="cal-grid" class="cal-grid"></div>
+      <div class="cal-legend"><span class="cal-star">&#11088;</span> = puzzle solved</div>
+      <button class="btn" id="cal-close" type="button" style="margin-top:14px;width:100%;">Close</button>
+    </div>
+  </div>
+
+  <div class="hud">
+    <div class="hud-item">
+      <div class="hud-label">Score</div>
+      <div class="hud-value" id="hud-score">0</div>
+    </div>
+    <div class="hud-item">
+      <div class="hud-label">Words</div>
+      <div class="hud-value" id="hud-words">0</div>
+    </div>
+    <div class="hud-item">
+      <div class="hud-label">Hint</div>
+      <button class="hud-hint-btn" id="hint-request-btn" type="button">Reveal <span id="hint-credits-label">(0)</span></button>
+    </div>
+  </div>
+
+  <div class="target-banner" id="target-banner" style="display:none;"></div>
+
+  <div id="board">
+    <button id="rotate-btn" class="rotate-btn" type="button" title="Rotate the board for a new perspective">&#8635;</button>
+    <div id="tiles-grid"></div>
+    <svg id="trail-svg"></svg>
+    <div id="board-popup" class="board-popup"></div>
+  </div>
+
+  <div class="current-word" id="current-word">&nbsp;</div>
+
+  <div class="words-section">
+    <div class="hints-header">
+      <div class="words-title" style="margin-bottom:0;">Words Found</div>
+      <button class="btn" id="end-collect-btn-main" type="button" style="display:none;">End &amp; Collect Star &#11088;</button>
+    </div>
+    <div id="word-board" class="word-board"></div>
+  </div>
+
+  <div class="archive-row">
+    <button class="btn secondary" id="calendar-btn" type="button" style="display:none;">Older Puzzles</button>
+  </div>
+
+  <div id="word-def-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card word-def-card">
+      <div id="word-def-title" class="word-def-title"></div>
+      <div id="word-def-body" class="word-def-body">Loading...</div>
+      <button class="btn" id="word-def-close" type="button" style="margin-top:14px;width:100%;">Close</button>
+    </div>
+  </div>
+
+  <div id="hint-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card word-def-card">
+      <div class="word-def-title">Hint</div>
+      <div id="hint-modal-pattern" class="blank-pattern" style="text-align:center;"></div>
+      <div id="hint-modal-def" class="word-def-body" style="margin-top:10px;">Loading...</div>
+      <button class="btn" id="hint-modal-close" type="button" style="margin-top:14px;width:100%;">Close</button>
+    </div>
+  </div>
+
+  <footer>Built for personal, offline use. No ads, no tracking, no accounts - just save this file and play. Hint definitions are fetched from a free public dictionary API, so that one feature needs internet access.</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Dictionary ---------- */
+const WORD_STR = "able acid acre act add ado age aged ago ahoy aid aide aim air airy ajar akin ale all ally alto amid amps ancient and anew animal answer ant any ape apex approach apt arc arch are argh arm army art ash ask ate atom aunt away awe axe axle babe back bad bag bail bait bake bald bale ball balm ban band bane bang bank bar barb bard bare barely bark barn base bash bask bass bast bat bath bawl bay bead beak beam bean bear beat beau because become bed bee been beer beet before beg behave behind believe belong below belt bend benefit bent beside best bet beta better beyond bib bicycle bid bide big bike bile bin bind bird bit bite blab blah blanket blot blow blue blur boa boar boat bob body bog boil bold bolt bomb bond bone book boom boon boot border bore boring born boss both bottle bottom bought bounce bout bow bowl box boy brag branch brat breeze brew bridge bright brim bring broken brow bubble buck bucket bud budget buffer bug bulb bulk bull bump bun bundle bunk burden burn bus bush bust busy but button buy cab cake calf call calm calmly came camera camp can cancel candle cane canvas cap cape car card care carpet cart case cash cast castle cat cave caw cent center chairs chance change chap charge chat cheese chew chicken chin chip choice choose chop circle cite city clad clam clan clap claw clay client clip clog closer club clue coal coat cob cod code coffee cog coil coin cold column come comfort common compact company compare compete complex compose con concept concern conduct cone confirm connect consult contact contain content contest context control convert cook cool cop cope copy cord core cork corn corner cost cot cotton county couple course cove cow coy cozy crab crag cram create credit crew crib crisis critic crop crow cry cub cube cue cuff cull cup curb cure curl cush custom cut dab dad dale dam damage dame damp danger dare dark dart dash date dawn day daze dean dear debate debt decide deck deed deem deep deer define defy degree delete deliver dell demand den dent depend design desire detail device dew dial dice did die differ dig dim dime dine dinner dip dire direct dirt disc dish dive dock doctor dodo dog dole doll domain dome don done dorm dose dost dot doth double dour dove down drab drag dragon draw dream driver drop drug drum dry dub duck duct dude due duel duet dug duke dull duly dumb dump dune dupe during dusk dust duty dye each ear earl earn ease easily east easy eat ebb edge edit editor eely effect effort egg ego eighty either elbow element elf elk elm else enable encode end energy engage engine enjoy enough ensure entire envy epic equal era err error escape estate ethnic eve even event ever evil evolve ewe exact exam examine except excess excite exist exit expand expect expert export expose extend eye fabric face fact factor fad fade fail fain fair fake fall fame family famous fan fang far fare farm fast fat fate father fax faze fear feat feature fed fee feed feel feet fell fellow felt fend fern fest feud few fib fiber field fig figure file fill film fin final find fine finger finish fire firm fish fist fit five fix flag flap flat flaw flax flee flew flight flip flit float floor flow flower flu flue fly foal foam focus foe fog foil fold folk follow fond font food fool foot for ford forest forget fork form formal format former fort fortune forward fought foul four fourth fowl fox free freeze french fret friend frog from front fruit fry fuel full fume fun fund funny fur fury fuse fuss future gag gain gait gal gala gale game gang gap gape garden gas gash gasp gate gather gave gay gaze gear gel gem gene gentle germ get ghost gift girl give given glad glee glen glib global glow glue glut gnu goal goat gob god gold golden golf gone gong good goof goon goop gore gory gosh govern gown grab grade grain gram grand grant grasp gray great green grew grey grid grim grin grip grit ground group grow grub guard guess guest guide gulf gulp gum gun gush gust gut guy gym gyro habit had hair hale half hall halo halt ham hand handle hang happen happy harbor hard hardly hare harm harp has hash hat hate haul have hawk hay haze head heal health heap hear heart heat heavy heed heel height heir held hell helm help hem hen her herb herd here hero hew hid hidden hide high hike hill hilt hind hint hip hire his hit hive hoax hoe hog hold holder hole holy home honest honey hood hoof hook hoop hoot hop hope hoping horn horse hose host hot hotel hour house how hub hue hug huge hulk hull hum human humor hungry hunt hunter hurl hurt hush husk hut hymn ice icy idea idle idol ill image imp impact import inch income indeed info injury ink inn inside insist intend into invite ion iris irk iron island itch its itself ivy jab jack jacket jade jail jam jar jaw jay jazz jean jerk jersey jet jig job jog join joke jolt jowl joy joys judge judo jug junior jury just keen keep keg kelp kept key khan kick kid kill kin kind king kingdom kiss kit kitchen kite kiwi knee knew knit knob knot know lab labor lace lack lad ladder lady lag laid lair lake lamb lamp land lane lap lard lark lash last late lately latter laugh launch lava law lawn lay lazy lead leader leaf league leak lean leap learn leather led leek leg legacy lend length lens lent less lesson lest let letter level lick lid lie lied life lift light like limb lime limit limp line link lion lip list listen lit little live living load loaf loan local locate lock lodge loft log logic logo lone lonely long look loom loop loot lord lore lose loss lost lot loud love low lower loyal luck lull lump lung lure lush lust luxe luxury lynx mace mad madam made magi magic maid mail main mainly make male mall malt mama man manage mane manner manual many map maps mare margin mark market mars mask mass mast master mat mate math matter maul maw may maybe mayor mean meant meat medium meek meet melt member memo memory men mend mental mentor menu mere merely mesa mesh mess met method mid middle mighty mild mile milk mill mind mine mineral mint minute mire mirror mist mix mixed moan moat mob mock mode model modern modest mold mole mom moment monk monkey month mood moon moor moot mop moral more moss most mostly moth mother motion motive mount mouse mouth move movie much muck mud muff mug mule mull mum muscle museum mush musk must mute myth nab nag nail name nap nape nation nature navy near nearby nearly neat neck need needle nephew nerve nest net never new news next nib nice nick nil nine nip nod node none nook noon nor norm normal north nose not note notice notion noun novel now nub nude numb number nun nurse nut nuts oak oar oat oath oats obey object obtain occupy occur odd ode odor off offer office oft often oil okay old omen omit once one onion online opal open opt option oral orange orb order ore origin other our out outfit output outside over owe owl own oxygen pace pack packet pact pad page paid pail pain pair pal palace pale palm pan pane panel pang pant par pare parent park part partly pass past pat patent path pause pave paw pay payment pea peak peal pear peas peat peck peel peer peg pelt pen people perfect period permit person pest pet phase phone photo pick picture pie pier pig pike pile pill pilot pin pinch pine pink pint pipe pistol pit pity place plain plan plane planet plant plastic player plea please plenty plot plow plug plum plus ply pocket pod poem poet poetry point pole police policy poll pomp pond pony pool poor pop pope pork port portion pose posh post pot pour pout power practice praise pray prefer prep press pretty prevent prey price pride prince print prior prison prod profit prom promise proof prop proper protect proud prov prove provide prow pry pub public puck puff pug pull pulp pulse puma pump pun punk punt pup pupa pure purple purpose push put putt puzzle quad quail quake qualm quart quarter queen quest quick quiet quill quilt quip quit quite quiz quo quota race rack radio raft rag rage raid rail rain raise rake rally ram ramp ran random rang range rank rant rap rapid rare rarely rash rat rate rather rave raw ray reach read reader ready real ream reap rear reason recall recent record red reduce reef reel reflect reform refuse region rein relax relief rely remain remark remind remote remove render rent repair repeat replace report rescue resist resort rest result retail retain return reveal review reward rib ribbon rice rich rid ride rift rim ring riot rip ripe rise risk rite river road roam roar rob robe rock rocket rod rode role roll roof room root rope rose rosy rot rout route rove row royal rub ruby rude rug ruin rule rum rumor run rung runt rush rust rut ruth rye sack sad safe sag saga sage said sail salt same sample sand sane sang sank sap sash sat save saw say scale scan scar scat scene scheme school scoop score screen script sea seal seam sear search seas season seat second secret sect sector secure seed seek seem seen select self sell send senior sense sent sept sera serf series set settle sew shadow shale shall sham shape share shark sharp she shed sheep sheet shelf shell shift shin shine ship shirt shock shoe shoot shop shore short shot should shout show shrub shun shut shy sick side sight sign signal silent silk silo silver simple simply sin sing single sink sip sir sister sit site six size sketch skew ski skid skill skin skip skull sky slab slam slap slat slaw sled sleek sleep sleet slew slice slid slide slim slip slit slop slot slow slug slum slur sly small smart smell smile smoke smooth smug snag snap snip snob snow soak soap soar sob social sock sod soda sofa soft soil sold soldier sole solid solo solve some son song soon soot sore sorry sort soul sound soup sour source south soy spa space spar spat speak speech speed spell spend spent spin spit sport spot spread spring spry spud spun spur spy square stable stack staff stage stand star start state stay steady steal steam steel stem step stew stick stir stock stone stop store storm story stow strain strand street strict strike strip strong stub stud study stuff stun sty style sub submit such sudden sue suffer suit sulk sum summer summit sun sung sunk sup supply sure surf survey swab swan swap swat sway swim switch swum symbol system tab table tack tad tag tail take tale talent talk tall tame tan tank tap tape tar target tarp task tax tea teach teacher teal team tear tech ted tee teen tell temp temple ten tend tender tennis tent tenth term test text than that thaw the them then theory thick thin thing think third this though threat throat throw thus thy tick ticket tide tidy tie tied tier tile till tilt timber time tin tint tiny tip tissue title toad toast today toe toil toilet told toll tomato tomb ton tone tong tonight too took tool toot top topic tore torn toss tot total touch tough tour tout tow tower town toy toys trace track trade trail train tram trap travel tray treat tree trek trend trial tribe trick trim trip trod trot true trust truth try tub tuba tube tuck tuft tug tulip tuna tune turf turn tusk twelve twenty twig twin two type ugh uncle undo unique unit unless unlike until unto update upon urban urge urn usage use used user usual vale valid value van vane vapor vast vat vault vector vein vendor vent venture verify version very vessel vest vet veto via vial vice victim victor view vine virus visa visit visual void volt volume vote voter vow voyage wade wag wage wagon wail wait wake walk wall walnut wan wand wander want war ward warm warn wart was wash wasp water wave wax way weak wean wear web wed wee weep weight weld well went wept were west wet what wheel when where whey while whim whip whir white whiz who whole whom whose why wick wide wife wig wild will wilt win wind wine wing wink winter wipe wire wisdom wise wish wit with within woe wolf womb won wonder woo wood wool word wore work world worm worn worry worse worst worth wound wow wrap wren writ writer yak yam yap yard yarn yaw yawn yea year yell yelp yes yet yew yield yoga yoke yolk yon you young your yowl yule zag zap zeal zed zero zest zinc zone zoo zoom";
+const DICTIONARY = new Set(WORD_STR.split(" "));
+const LONG_WORDS = [["misunderstanding", "A failure to interpret someone's words or actions correctly"], ["uncharacteristic", "Not typical of a person's usual behavior"], ["disproportionate", "Too large or too small in relation to something else"], ["unconventionally", "In a way that breaks from what's usual or expected"], ["responsibilities", "Duties or obligations a person is expected to fulfill"], ["characterization", "The way a person or thing is described or portrayed"], ["environmentalist", "Someone who advocates for protecting the natural world"], ["overcompensating", "Making up for a shortcoming to an excessive degree"], ["entrepreneurship", "The activity of starting and running a new business"], ["underappreciated", "Not valued or recognized as much as it deserves"], ["overcomplicating", "Making something more complex than it needs to be"]]; // [[word, hint], ...]
+
+/* ---------- Trie for full-board solving ---------- */
+function insertWord(root, word){
+  let node = root;
+  for (const ch of word){
+    node = node[ch] || (node[ch] = {});
+  }
+  node.isWord = true;
+}
+const TRIE_ROOT = {};
+DICTIONARY.forEach(w => insertWord(TRIE_ROOT, w));
+
+/* ---------- Seeded RNG (mulberry32) ---------- */
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function seedFromString(str){
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++){
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return h >>> 0;
+}
+
+/* Standard Boggle dice (classic 4x4 set) */
+const BOGGLE_DICE = [
+  "AAEEGN","ABBJOO","ACHOPS","AFFKPS",
+  "AOOTTW","CIMOTU","DEILRX","DELRVY",
+  "DISTTY","EEGHNW","EEINSU","EHRTVW",
+  "EIOSST","ELRTTY","HIMNQU","HLNNRZ"
+];
+
+function rollGrid(rng){
+  const dice = BOGGLE_DICE.slice();
+  for (let i = dice.length - 1; i > 0; i--){
+    const j = Math.floor(rng() * (i + 1));
+    const tmp = dice[i]; dice[i] = dice[j]; dice[j] = tmp;
+  }
+  return dice.map(d => {
+    const face = d[Math.floor(rng() * d.length)];
+    return face === "Q" ? "QU" : face;
+  });
+}
+
+function buildDailyBoard(rng){
+  const entry = LONG_WORDS[Math.floor(rng() * LONG_WORDS.length)];
+  const word = entry[0];
+  const hint = entry[1];
+  const path = generateHamiltonianPath(rng);
+  const gridLetters = new Array(16);
+  for (let k = 0; k < 16; k++){
+    gridLetters[path[k]] = word[k].toUpperCase();
+  }
+  return { gridLetters, word, hint };
+}
+
+/* Randomized backtracking search for a Hamiltonian path over the 4x4
+   king's-move graph, so the daily word threads through every tile in a
+   genuinely scrambled-looking order rather than a predictable row/column
+   sweep. The graph is small and highly connected, so this resolves almost
+   instantly; a couple of deterministic fallback templates guard against
+   the extremely unlikely case that it doesn't. */
+function shuffleWithRng(arr, rng){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rng() * (i + 1));
+    const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function generateHamiltonianPath(rng){
+  const starts = shuffleWithRng([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], rng);
+  for (const start of starts){
+    const visited = new Array(16).fill(false);
+    const stack = [start];
+    visited[start] = true;
+    if (walkHamiltonian(stack, visited, rng)) return stack.slice();
+  }
+  // Fallback (should not be reached in practice)
+  return [0,1,2,3,7,6,5,4,8,9,10,11,15,14,13,12];
+}
+
+function walkHamiltonian(stack, visited, rng){
+  if (stack.length === 16) return true;
+  const current = stack[stack.length - 1];
+  const neighbors = shuffleWithRng(NEIGHBOR_MAP[current], rng);
+  for (const n of neighbors){
+    if (visited[n]) continue;
+    visited[n] = true;
+    stack.push(n);
+    if (walkHamiltonian(stack, visited, rng)) return true;
+    stack.pop();
+    visited[n] = false;
+  }
+  return false;
+}
+
+/* ---------- Adjacency for 4x4 grid ---------- */
+function neighborsOf(i){
+  const r = Math.floor(i / 4), c = i % 4;
+  const out = [];
+  for (let dr = -1; dr <= 1; dr++){
+    for (let dc = -1; dc <= 1; dc++){
+      if (dr === 0 && dc === 0) continue;
+      const nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < 4 && nc >= 0 && nc < 4) out.push(nr * 4 + nc);
+    }
+  }
+  return out;
+}
+const NEIGHBOR_MAP = Array.from({length:16}, function(_, i){ return neighborsOf(i); });
+
+function solveBoard(lettersArr){
+  const results = new Set();
+  function dfs(pos, node, current, visited){
+    const letter = lettersArr[pos].toLowerCase();
+    let cur = node;
+    for (const ch of letter){
+      cur = cur[ch];
+      if (!cur) return;
+    }
+    const word = current + letter;
+    if (cur.isWord && word.length >= 3) results.add(word);
+    for (const n of NEIGHBOR_MAP[pos]){
+      if (visited.has(n)) continue;
+      visited.add(n);
+      dfs(n, cur, word, visited);
+      visited.delete(n);
+    }
+  }
+  for (let i = 0; i < 16; i++){
+    dfs(i, TRIE_ROOT, "", new Set([i]));
+  }
+  return results;
+}
+
+function scoreForWord(word){
+  const len = word.length;
+  if (len === 3) return 1;
+  if (len === 4) return 2;
+  if (len === 5) return 3;
+  if (len === 6) return 5;
+  if (len === 7) return 8;
+  if (len === 8) return 12;
+  return 20 + (len - 9) * 3;
+}
+
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+}
+
+function lengthBucket(len){
+  return len >= 8 ? "8+" : String(len);
+}
+function computeCounts(wordSet){
+  const counts = {"3":0,"4":0,"5":0,"6":0,"7":0,"8+":0};
+  wordSet.forEach(function(w){
+    counts[lengthBucket(w.length)]++;
+  });
+  return counts;
+}
+
+/* ---------- Game State ---------- */
+let mode = "classic";
+let letters = [];
+let path = [];
+let found = new Set();
+let score = 0;
+let targetWord = null;
+let targetHint = "";
+let targetSolved = false;
+let gameEnded = false;
+let currentPuzzleDateKey = null;
+let solvedWords = new Set();
+let totalCounts = {"3":0,"4":0,"5":0,"6":0,"7":0,"8+":0};
+let hintCredits = 0;
+let hintedWords = new Set();
+let hintRequestInFlight = false;
+
+const boardEl = document.getElementById("board");
+const tilesGridEl = document.getElementById("tiles-grid");
+const trailSvg = document.getElementById("trail-svg");
+const boardPopupEl = document.getElementById("board-popup");
+const currentWordEl = document.getElementById("current-word");
+const hudScore = document.getElementById("hud-score");
+const hudWords = document.getElementById("hud-words");
+const wordBoardEl = document.getElementById("word-board");
+const targetBanner = document.getElementById("target-banner");
+const toastEl = document.getElementById("toast");
+const hintCreditsLabel = document.getElementById("hint-credits-label");
+const endCollectBtn = document.getElementById("end-collect-btn-main");
+const definitionCache = new Map();
+
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(function(){ toastEl.classList.remove("show"); }, 1400);
+}
+
+function praiseForLength(len){
+  if (len >= 12) return "LEGENDARY!";
+  if (len >= 8) return "Incredible!";
+  if (len === 7) return "Amazing!";
+  if (len === 6) return "Awesome!";
+  if (len === 5) return "Great!";
+  if (len === 4) return "Nice!";
+  return "Good!";
+}
+
+function showWordPopup(mainText, subText){
+  boardPopupEl.innerHTML = mainText + (subText ? "<div class='popup-sub'>" + subText + "</div>" : "");
+  boardPopupEl.classList.add("show");
+  clearTimeout(showWordPopup._t);
+  showWordPopup._t = setTimeout(function(){ boardPopupEl.classList.remove("show"); }, 900);
+}
+
+function formatDateKeyReadable(key){
+  const parts = key.split("-").map(Number);
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return monthNames[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+}
+
+function renderTargetBanner(){
+  if (mode !== "daily"){
+    targetBanner.style.display = "none";
+    return;
+  }
+  targetBanner.style.display = "block";
+  const isToday = currentPuzzleDateKey === todayKey();
+  const dateLabel = isToday ? "Today's" : (formatDateKeyReadable(currentPuzzleDateKey) + "'s");
+
+  if (gameEnded){
+    targetBanner.classList.add("solved");
+    targetBanner.innerHTML = "\u2b50 Star collected for " + dateLabel + " word: <b>" + targetWord.toUpperCase() + "</b>" +
+      "<span class='sub'>" + targetHint + "</span>";
+    return;
+  }
+
+  if (targetSolved){
+    targetBanner.classList.add("solved");
+    targetBanner.innerHTML = "You found it! <b>" + targetWord.toUpperCase() + "</b> \u2713" +
+      "<span class='sub'>" + targetHint + "</span>" +
+      "<span class='sub'>Keep playing for more words, or collect your star below whenever you're ready.</span>";
+    return;
+  }
+
+  targetBanner.classList.remove("solved");
+  const pattern = targetWord.split("").map(function(ch, i){ return i === 0 ? ch.toUpperCase() : "_"; }).join(" ");
+  targetBanner.innerHTML =
+    dateLabel + " hidden word (" + targetWord.length + " letters) uses every tile on the board:" +
+    "<div class='blank-pattern'>" + pattern + "</div>" +
+    "<button class='btn secondary hint-btn' id='hint-btn' type='button'>Show hint</button>" +
+    "<div class='hint-text' id='hint-text' style='display:none;'>" + targetHint + "</div>" +
+    "<span class='sub'>trace all 16 tiles in order to find it</span>";
+  document.getElementById("hint-btn").addEventListener("click", function(){
+    const t = document.getElementById("hint-text");
+    const btn = document.getElementById("hint-btn");
+    const showing = t.style.display !== "none";
+    t.style.display = showing ? "none" : "block";
+    btn.textContent = showing ? "Show hint" : "Hide hint";
+  });
+}
+
+function startGame(newMode, dateKeyOverride){
+  mode = newMode || mode;
+  document.getElementById("mode-classic").classList.toggle("active", mode === "classic");
+  document.getElementById("mode-daily").classList.toggle("active", mode === "daily");
+  document.getElementById("calendar-btn").style.display = mode === "daily" ? "inline-block" : "none";
+
+  found = new Set();
+  score = 0;
+  path = [];
+  targetSolved = false;
+  gameEnded = false;
+  hintCredits = 0;
+  hintedWords = new Set();
+
+  if (mode === "daily"){
+    currentPuzzleDateKey = dateKeyOverride || todayKey();
+    const rng = mulberry32(seedFromString(currentPuzzleDateKey));
+    const built = buildDailyBoard(rng);
+    letters = built.gridLetters;
+    targetWord = built.word;
+    targetHint = built.hint;
+    DICTIONARY.add(targetWord);
+    insertWord(TRIE_ROOT, targetWord);
+  } else {
+    const rng = mulberry32((Math.random() * Math.pow(2,31)) | 0);
+    letters = rollGrid(rng);
+    targetWord = null;
+  }
+
+  solvedWords = solveBoard(letters);
+  totalCounts = computeCounts(solvedWords);
+
+  boardRotation = 0;
+  applyBoardRotation();
+  renderBoard();
+  renderTargetBanner();
+  renderWordBoard();
+  updateHintCreditsLabel();
+  updateEndCollectVisibility();
+  updateHud();
+  currentWordEl.innerHTML = "&nbsp;";
+  drawTrail();
+}
+
+function updateHud(){
+  hudScore.textContent = score;
+  hudWords.textContent = found.size;
+}
+
+function updateEndCollectVisibility(){
+  const show = mode === "daily" && targetSolved && !gameEnded;
+  endCollectBtn.style.display = show ? "inline-block" : "none";
+}
+
+endCollectBtn.addEventListener("click", function(){
+  if (mode !== "daily" || !targetSolved || gameEnded) return;
+  gameEnded = true;
+  tilesGridEl.style.pointerEvents = "none";
+  markDayCompleted(currentPuzzleDateKey);
+  showToast("Star collected! \u2b50");
+  updateEndCollectVisibility();
+  renderTargetBanner();
+});
+
+let boardRotation = 0;
+function applyBoardRotation(){
+  tilesGridEl.style.setProperty("--board-rotate", boardRotation + "deg");
+  tilesGridEl.style.setProperty("--counter-rotate", (-boardRotation) + "deg");
+}
+function rotateBoard(){
+  boardRotation = (boardRotation + 90) % 360;
+  applyBoardRotation();
+}
+document.getElementById("rotate-btn").addEventListener("click", rotateBoard);
+
+function renderBoard(){
+  tilesGridEl.innerHTML = "";
+  tilesGridEl.style.pointerEvents = "auto";
+  letters.forEach(function(letter, i){
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.dataset.idx = i;
+    tile.innerHTML = letter === "QU" ? "Q<span class='qu'>u</span>" : letter;
+    tilesGridEl.appendChild(tile);
+  });
+}
+
+function tileEls(){
+  return tilesGridEl.querySelectorAll(".tile");
+}
+
+function onTileDown(i){
+  path = [i];
+  refreshSelection();
+}
+function onTileEnter(i){
+  if (path.length === 0) return;
+  const last = path[path.length - 1];
+  if (i === last) return;
+  const already = path.indexOf(i);
+  if (already !== -1){
+    path = path.slice(0, already + 1);
+    refreshSelection();
+    return;
+  }
+  if (NEIGHBOR_MAP[last].indexOf(i) === -1) return;
+  path.push(i);
+  refreshSelection();
+}
+function onPointerUp(){
+  if (path.length === 0) return;
+  submitPath();
+  path = [];
+  refreshSelection();
+}
+
+boardEl.addEventListener("pointerdown", function(e){
+  const tileEl = e.target.closest ? e.target.closest(".tile") : null;
+  if (!tileEl) return;
+  onTileDown(parseInt(tileEl.dataset.idx, 10));
+});
+document.addEventListener("pointermove", function(e){
+  if (path.length === 0) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const tileEl = el && el.closest ? el.closest(".tile") : null;
+  if (!tileEl) return;
+  onTileEnter(parseInt(tileEl.dataset.idx, 10));
+});
+document.addEventListener("pointerup", onPointerUp);
+document.addEventListener("pointercancel", onPointerUp);
+
+function currentPathIsValidWord(word){
+  if (word.length < 3) return false;
+  if (found.has(word)) return false; // already claimed - nothing new to signal
+  return DICTIONARY.has(word) || (mode === "daily" && word === targetWord);
+}
+
+function refreshSelection(){
+  const els = tileEls();
+  els.forEach(function(el){ el.classList.remove("selected", "valid"); });
+  let word = "";
+  path.forEach(function(idx){
+    word += letters[idx];
+  });
+  const lower = word.toLowerCase();
+  const isValid = currentPathIsValidWord(lower);
+  path.forEach(function(idx){
+    const el = els[idx];
+    el.classList.add("selected");
+    if (isValid) el.classList.add("valid");
+  });
+  currentWordEl.textContent = word || "\u00A0";
+  currentWordEl.classList.toggle("valid", isValid);
+  drawTrail(isValid);
+}
+
+function drawTrail(isValid){
+  if (path.length < 2){
+    trailSvg.innerHTML = "";
+    return;
+  }
+  const color = isValid ? "#4f9c82" : "#d4a84b";
+  const svgRect = trailSvg.getBoundingClientRect();
+  trailSvg.setAttribute("viewBox", "0 0 " + svgRect.width + " " + svgRect.height);
+  const els = tileEls();
+  const pts = path.map(function(idx){
+    const r = els[idx].getBoundingClientRect();
+    return [(r.left + r.width / 2) - svgRect.left, (r.top + r.height / 2) - svgRect.top];
+  });
+  const pointsAttr = pts.map(function(p){ return p[0] + "," + p[1]; }).join(" ");
+  let svgContent = '<polyline points="' + pointsAttr + '" fill="none" stroke="' + color + '" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>';
+  pts.forEach(function(p){
+    svgContent += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="6" fill="' + color + '" opacity="0.6"/>';
+  });
+  trailSvg.innerHTML = svgContent;
+}
+
+function submitPath(){
+  const word = path.map(function(idx){ return letters[idx]; }).join("").toLowerCase();
+  if (word.length < 3) return;
+  if (found.has(word)){
+    showToast("Already found");
+    return;
+  }
+  if (!DICTIONARY.has(word)){
+    showToast("Not in word list");
+    return;
+  }
+  found.add(word);
+  const isBonus = mode === "daily" && targetWord && word === targetWord;
+  const pts = scoreForWord(word);
+  score += pts;
+  hintCredits += 1;
+  renderWordBoard();
+  updateHintCreditsLabel();
+  updateHud();
+  showWordPopup(isBonus ? "LEGENDARY!" : praiseForLength(word.length), "+" + pts);
+  playFoundSound(isBonus);
+
+  if (isBonus && !targetSolved){
+    targetSolved = true;
+    updateEndCollectVisibility();
+    renderTargetBanner();
+  }
+}
+
+function playFoundSound(isBonus){
+  try{
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!window._twAudioCtx) window._twAudioCtx = new AudioCtx();
+    const ctx = window._twAudioCtx;
+    if (ctx.state === "suspended") ctx.resume();
+    const now = ctx.currentTime;
+    const notes = isBonus ? [523.25, 659.25, 783.99, 1046.5] : [523.25, 659.25, 783.99];
+    notes.forEach(function(freq, i){
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      const start = now + i * 0.07;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.28, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.28);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.32);
+    });
+  } catch (err) { /* audio unavailable, ignore */ }
+}
+
+function updateHintCreditsLabel(){
+  hintCreditsLabel.textContent = "(" + hintCredits + ")";
+}
+
+function nextHintCandidate(){
+  const candidates = Array.from(solvedWords).filter(function(w){
+    return !found.has(w) && w !== targetWord && !hintedWords.has(w);
+  });
+  candidates.sort(function(a, b){ return a.length - b.length || a.localeCompare(b); });
+  return candidates.length ? candidates[0] : null;
+}
+
+async function requestHint(){
+  if (hintRequestInFlight) return;
+  if (hintCredits <= 0){
+    showToast("Find a word to earn a hint");
+    return;
+  }
+  const word = nextHintCandidate();
+  if (!word){
+    showToast("No more hints available on this board");
+    return;
+  }
+  hintCredits -= 1;
+  updateHintCreditsLabel();
+  hintedWords.add(word);
+  hintRequestInFlight = true;
+
+  const modal = document.getElementById("hint-modal");
+  const patternEl = document.getElementById("hint-modal-pattern");
+  const defEl = document.getElementById("hint-modal-def");
+  const pattern = word.split("").map(function(ch, i){ return i === 0 ? ch.toUpperCase() : "_"; }).join(" ");
+  patternEl.textContent = pattern + " (" + word.length + ")";
+  defEl.textContent = "Looking up definition...";
+  modal.style.display = "flex";
+
+  try{
+    const res = await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word));
+    if (!res.ok) throw new Error("no definition");
+    const data = await res.json();
+    const meanings = data[0] && data[0].meanings;
+    const def = meanings && meanings[0] && meanings[0].definitions && meanings[0].definitions[0] && meanings[0].definitions[0].definition;
+    defEl.textContent = def || ("A " + word.length + "-letter word on this board.");
+  } catch (err) {
+    defEl.textContent = "Couldn't fetch a definition right now (needs internet access) - but it's a " + word.length + "-letter word on this board.";
+  }
+  hintRequestInFlight = false;
+}
+document.getElementById("hint-request-btn").addEventListener("click", requestHint);
+document.getElementById("hint-modal-close").addEventListener("click", function(){
+  document.getElementById("hint-modal").style.display = "none";
+});
+document.getElementById("hint-modal").addEventListener("click", function(e){
+  if (e.target.id === "hint-modal") document.getElementById("hint-modal").style.display = "none";
+});
+
+const BUCKET_COLORS = {"3":"#ff5c8d","4":"#ff9f43","5":"#ffd93d","6":"#4ecb71","7":"#4d96ff","8+":"#a06bff"};
+const BUCKET_CIRCUMFERENCE = 99.9; // circumference trick for r=15.9 donut
+
+function renderWordBoard(){
+  const buckets = ["3","4","5","6","7","8+"];
+  const foundByBucket = {};
+  buckets.forEach(function(b){ foundByBucket[b] = []; });
+  Array.from(found).forEach(function(w){ foundByBucket[lengthBucket(w.length)].push(w); });
+
+  const activeBuckets = buckets.filter(function(b){ return (totalCounts[b] || 0) > 0; });
+
+  if (activeBuckets.length === 0){
+    wordBoardEl.innerHTML = "<span class='empty-note'>Drag across adjacent letters to spell a word - 3 letters minimum.</span>";
+    return;
+  }
+
+  wordBoardEl.innerHTML = activeBuckets.map(function(b){
+    const total = totalCounts[b] || 0;
+    const gotWords = foundByBucket[b].slice().sort();
+    const got = gotWords.length;
+    const remaining = Math.max(total - got, 0);
+    const percent = total > 0 ? (got / total) * BUCKET_CIRCUMFERENCE : 0;
+    const color = BUCKET_COLORS[b];
+    const donut =
+      "<svg class='donut' viewBox='0 0 36 36'>" +
+        "<circle class='donut-bg' cx='18' cy='18' r='15.9'/>" +
+        "<circle class='donut-fill' cx='18' cy='18' r='15.9' stroke='" + color + "' " +
+          "stroke-dasharray='" + percent.toFixed(1) + " " + BUCKET_CIRCUMFERENCE + "' " +
+          "transform='rotate(-90 18 18)'/>" +
+        "<text x='18' y='21.5' class='donut-text'>" + remaining + "</text>" +
+      "</svg>";
+    const items = gotWords.length
+      ? gotWords.map(function(w){
+          const cls = (w === targetWord) ? "chip bonus" : "chip";
+          return "<button type='button' class='" + cls + "' data-word='" + w + "'>" + w.toUpperCase() + "</button>";
+        }).join("")
+      : "<span class='empty-note-small'>none yet</span>";
+    return "<div class='len-col'>" + donut +
+      "<div class='len-col-label'>" + b + "-letter</div>" +
+      "<div class='len-col-words'>" + items + "</div>" +
+    "</div>";
+  }).join("");
+}
+
+wordBoardEl.addEventListener("click", function(e){
+  const chip = e.target.closest ? e.target.closest(".chip") : null;
+  if (!chip) return;
+  const word = chip.dataset.word;
+  if (word) showWordDefinition(word);
+});
+
+async function showWordDefinition(word){
+  const modal = document.getElementById("word-def-modal");
+  const titleEl = document.getElementById("word-def-title");
+  const bodyEl = document.getElementById("word-def-body");
+  titleEl.textContent = word.toUpperCase();
+  modal.style.display = "flex";
+  if (definitionCache.has(word)){
+    bodyEl.textContent = definitionCache.get(word);
+    return;
+  }
+  bodyEl.textContent = "Looking up definition...";
+  try{
+    const res = await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word));
+    if (!res.ok) throw new Error("no definition");
+    const data = await res.json();
+    const meanings = data[0] && data[0].meanings;
+    const def = meanings && meanings[0] && meanings[0].definitions && meanings[0].definitions[0] && meanings[0].definitions[0].definition;
+    const text = def || ("A " + word.length + "-letter word found on this board.");
+    definitionCache.set(word, text);
+    bodyEl.textContent = text;
+  } catch (err) {
+    bodyEl.textContent = "Couldn't fetch a definition right now (needs internet access).";
+  }
+}
+function closeWordDefinition(){
+  document.getElementById("word-def-modal").style.display = "none";
+}
+document.getElementById("word-def-close").addEventListener("click", closeWordDefinition);
+document.getElementById("word-def-modal").addEventListener("click", function(e){
+  if (e.target.id === "word-def-modal") closeWordDefinition();
+});
+
+/* ---------- Puzzle archive: completion tracking + calendar ---------- */
+const ARCHIVE_START = new Date(2026, 0, 1); // Jan 1, 2026
+const STORAGE_KEY = "tumbleword_completed_days";
+
+function loadCompletedDays(){
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  } catch (err) {
+    return {};
+  }
+}
+function markDayCompleted(key){
+  try{
+    const data = loadCompletedDays();
+    data[key] = true;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (err) { /* storage unavailable, ignore */ }
+  if (document.getElementById("calendar-modal").style.display !== "none"){
+    renderCalendar();
+  }
+}
+function dateKeyFor(y, mZeroIdx, d){
+  return y + "-" + (mZeroIdx + 1) + "-" + d;
+}
+function dateOnly(d){
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+let calendarViewYear, calendarViewMonth;
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function openCalendar(){
+  const now = new Date();
+  calendarViewYear = now.getFullYear();
+  calendarViewMonth = now.getMonth();
+  renderCalendar();
+  document.getElementById("calendar-modal").style.display = "flex";
+}
+function closeCalendar(){
+  document.getElementById("calendar-modal").style.display = "none";
+}
+
+function renderCalendar(){
+  const now = new Date();
+  const today = dateOnly(now);
+  const y = calendarViewYear, m = calendarViewMonth;
+  document.getElementById("cal-month-label").textContent = MONTH_NAMES[m] + " " + y;
+
+  const prevBtn = document.getElementById("cal-prev");
+  const nextBtn = document.getElementById("cal-next");
+  prevBtn.disabled = (y === 2026 && m === 0);
+  nextBtn.disabled = (y === now.getFullYear() && m === now.getMonth());
+
+  const firstWeekday = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const completed = loadCompletedDays();
+  const weekdayLabels = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+
+  let html = weekdayLabels.map(function(w){ return "<div class='cal-weekday'>" + w + "</div>"; }).join("");
+  for (let i = 0; i < firstWeekday; i++) html += "<div></div>";
+  for (let d = 1; d <= daysInMonth; d++){
+    const cellDate = new Date(y, m, d);
+    const key = dateKeyFor(y, m, d);
+    const isFuture = cellDate > today;
+    const isBeforeStart = cellDate < ARCHIVE_START;
+    const isToday = cellDate.getTime() === today.getTime();
+    const isDone = !!completed[key];
+    const disabled = isFuture || isBeforeStart;
+    let cls = "cal-day";
+    if (disabled) cls += " disabled";
+    if (isToday) cls += " today";
+    if (isDone) cls += " done";
+    html += "<button type='button' class='" + cls + "' data-key='" + key + "'" + (disabled ? " disabled" : "") + ">" +
+      d + (isDone ? "<span class='cal-star'>\u2b50</span>" : "") +
+      "</button>";
+  }
+  const gridEl = document.getElementById("cal-grid");
+  gridEl.innerHTML = html;
+  gridEl.querySelectorAll(".cal-day:not(.disabled)").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      const key = btn.dataset.key;
+      closeCalendar();
+      startGame("daily", key);
+    });
+  });
+}
+
+document.getElementById("calendar-btn").addEventListener("click", openCalendar);
+document.getElementById("cal-close").addEventListener("click", closeCalendar);
+document.getElementById("calendar-modal").addEventListener("click", function(e){
+  if (e.target.id === "calendar-modal") closeCalendar();
+});
+document.getElementById("cal-prev").addEventListener("click", function(){
+  calendarViewMonth--;
+  if (calendarViewMonth < 0){ calendarViewMonth = 11; calendarViewYear--; }
+  renderCalendar();
+});
+document.getElementById("cal-next").addEventListener("click", function(){
+  calendarViewMonth++;
+  if (calendarViewMonth > 11){ calendarViewMonth = 0; calendarViewYear++; }
+  renderCalendar();
+});
+
+document.getElementById("mode-classic").addEventListener("click", function(){ startGame("classic"); });
+document.getElementById("mode-daily").addEventListener("click", function(){ startGame("daily"); });
+
+startGame("classic");
+
+/* Upgrade from the built-in ~2,200-word list to the full Scrabble-legal
+   word list (ENABLE1, public domain) in the background. Needs internet;
+   the game is fully playable on the built-in list if this fails. Tries
+   a couple of mirrors since raw.githubusercontent.com is occasionally
+   blocked by browsers/networks even when other sites work fine. */
+const DICTIONARY_SOURCES = [
+  "https://cdn.jsdelivr.net/gh/dolph/dictionary@master/enable1.txt",
+  "https://raw.githubusercontent.com/dolph/dictionary/master/enable1.txt"
+];
+
+async function fetchFirstAvailable(urls){
+  let lastErr = null;
+  for (const url of urls){
+    try{
+      const res = await fetch(url);
+      if (!res.ok) { lastErr = new Error("HTTP " + res.status + " from " + url); continue; }
+      return await res.text();
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw lastErr || new Error("all sources failed");
+}
+
+async function loadFullDictionary(){
+  if (location.protocol === "file:"){
+    console.warn("Tumbleword: running from a local file:// path. Most browsers block fetching remote files from a page opened this way, so the full Scrabble word list can't load. The built-in ~2,200-word list still works fully offline. To get the full list, host this file (e.g. GitHub Pages, Netlify) or serve it from a local web server instead of double-clicking it.");
+    showToast("Using the built-in word list (full list needs the page to be hosted, not opened as a file)");
+    return;
+  }
+  try{
+    const text = await fetchFirstAvailable(DICTIONARY_SOURCES);
+    const words = text.split(/\s+/);
+    let added = 0;
+    for (let i = 0; i < words.length; i++){
+      const w = words[i].trim().toLowerCase();
+      if (w.length >= 3 && w.length <= 16 && /^[a-z]+$/.test(w) && !DICTIONARY.has(w)){
+        DICTIONARY.add(w);
+        insertWord(TRIE_ROOT, w);
+        added++;
+      }
+    }
+    solvedWords = solveBoard(letters);
+    totalCounts = computeCounts(solvedWords);
+    renderWordBoard();
+    showToast("Full Scrabble word list loaded (+" + added + " words)");
+  } catch (err) {
+    console.warn("Could not load the full Scrabble word list; using the built-in common word list instead.", err);
+    showToast("Couldn't reach the full word list - playing with the built-in list instead");
+  }
+}
+loadFullDictionary();
+</script>
+</body>
+</html>
