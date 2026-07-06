@@ -950,6 +950,88 @@ function renderTargetBanner(){
   });
 }
 
+const SESSION_KEY = "tumbleword_session";
+
+function saveGameState(){
+  try{
+    const state = {
+      mode: mode,
+      letters: letters,
+      found: Array.from(found),
+      bonusFound: Array.from(bonusFound),
+      score: score,
+      targetWord: targetWord,
+      targetHint: targetHint,
+      targetSolved: targetSolved,
+      gameEnded: gameEnded,
+      currentPuzzleDateKey: currentPuzzleDateKey,
+      hintCredits: hintCredits,
+      hintedWords: Array.from(hintedWords),
+      zeroPointWords: Array.from(zeroPointWords),
+      wordsSinceLastHint: wordsSinceLastHint,
+      pendingHintWord: pendingHintWord
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(state));
+  } catch (err) { /* storage unavailable, ignore */ }
+}
+
+function loadGameState(){
+  try{
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+function restoreGameState(state){
+  mode = state.mode;
+  letters = state.letters;
+  found = new Set(state.found);
+  bonusFound = new Set(state.bonusFound);
+  score = state.score;
+  targetWord = state.targetWord;
+  targetHint = state.targetHint;
+  targetSolved = state.targetSolved;
+  gameEnded = state.gameEnded;
+  currentPuzzleDateKey = state.currentPuzzleDateKey;
+  hintCredits = state.hintCredits;
+  hintedWords = new Set(state.hintedWords);
+  zeroPointWords = new Set(state.zeroPointWords);
+  wordsSinceLastHint = state.wordsSinceLastHint;
+  pendingHintWord = state.pendingHintWord;
+  path = [];
+
+  if (mode === "daily" && targetWord){
+    COMMON_DICTIONARY.add(targetWord);
+    FULL_DICTIONARY.add(targetWord);
+    insertWord(COMMON_TRIE_ROOT, targetWord);
+  }
+
+  solvedWords = solveBoard(letters);
+  totalCounts = computeCounts(solvedWords);
+
+  document.getElementById("mode-classic").classList.toggle("active", mode === "classic");
+  document.getElementById("mode-daily").classList.toggle("active", mode === "daily");
+  document.getElementById("calendar-btn").style.display = mode === "daily" ? "inline-block" : "none";
+  document.getElementById("new-game-btn").style.display = mode === "classic" ? "inline-block" : "none";
+
+  boardRotation = 0;
+  applyBoardRotation();
+  renderBoard();
+  renderTargetBanner();
+  renderWordBoard();
+  updateHintCreditsLabel();
+  updateEndCollectVisibility();
+  updateHud();
+  currentWordEl.innerHTML = "&nbsp;";
+  drawTrail();
+
+  if (gameEnded){
+    tilesGridEl.style.pointerEvents = "none";
+  }
+}
+
 function startGame(newMode, dateKeyOverride){
   mode = newMode || mode;
   document.getElementById("mode-classic").classList.toggle("active", mode === "classic");
@@ -998,6 +1080,7 @@ function startGame(newMode, dateKeyOverride){
   updateHud();
   currentWordEl.innerHTML = "&nbsp;";
   drawTrail();
+  saveGameState();
 }
 
 function updateHud(){
@@ -1018,6 +1101,7 @@ endCollectBtn.addEventListener("click", function(){
   showToast("Star collected! \u2b50");
   updateEndCollectVisibility();
   renderTargetBanner();
+  saveGameState();
 });
 
 let boardRotation = 0;
@@ -1184,6 +1268,7 @@ function submitPath(){
     updateEndCollectVisibility();
     renderTargetBanner();
   }
+  saveGameState();
 }
 
 function playFoundSound(isBonus){
@@ -1275,6 +1360,7 @@ async function requestHint(){
   hintedWords.add(word);
   pendingHintWord = word;
   hintRequestInFlight = true;
+  saveGameState();
 
   showHintModal(word);
   const def = await fetchDefinitionWithRetry(word);
@@ -1295,6 +1381,7 @@ document.getElementById("hint-reveal-word-btn").addEventListener("click", functi
   if (!pendingHintWord) return;
   zeroPointWords.add(pendingHintWord);
   document.getElementById("hint-modal-pattern").textContent = pendingHintWord.toUpperCase() + " (" + pendingHintWord.length + ")";
+  saveGameState();
 });
 
 const BUCKET_COLORS = {"3":"#ff5c8d","4":"#ff9f43","5":"#ffd93d","6":"#4ecb71","7":"#4d96ff","8+":"#a06bff"};
@@ -1502,7 +1589,16 @@ document.getElementById("mode-classic").addEventListener("click", function(){ st
 document.getElementById("mode-daily").addEventListener("click", function(){ startGame("daily"); });
 document.getElementById("new-game-btn").addEventListener("click", function(){ startGame("classic"); });
 
-startGame("daily");
+(function initGame(){
+  const saved = loadGameState();
+  const savedIsUsable = saved && saved.letters && saved.letters.length === 16 &&
+    (saved.mode === "classic" || (saved.mode === "daily" && saved.currentPuzzleDateKey === todayKey()));
+  if (savedIsUsable){
+    restoreGameState(saved);
+  } else {
+    startGame("daily");
+  }
+})();
 
 /* Upgrade from the built-in ~2,200-word list to the full Scrabble-legal
    word list (ENABLE1, public domain) in the background. Needs internet;
