@@ -1093,6 +1093,7 @@ function startGame(newMode, dateKeyOverride){
     COMMON_DICTIONARY.add(targetWord);
     FULL_DICTIONARY.add(targetWord);
     insertWord(COMMON_TRIE_ROOT, targetWord);
+    promoteTargetWordPartsToCommon(targetWord);
   } else {
     const rng = mulberry32((Math.random() * Math.pow(2,31)) | 0);
     letters = rollGrid(rng);
@@ -1718,6 +1719,28 @@ function promotePluralsToCommon(){
   return added;
 }
 
+/* Every contiguous chunk of the daily target word that's itself a real word
+   (e.g. "proportion" and "disproportion" inside "disproportionate") should
+   count as common too - it's automatically traceable on the board since the
+   whole board is just the target word threaded along one path. */
+function promoteTargetWordPartsToCommon(word){
+  if (!word) return 0;
+  let added = 0;
+  for (let i = 0; i < word.length; i++){
+    for (let j = i + 3; j <= word.length; j++){
+      if (i === 0 && j === word.length) continue; // the full word is handled separately
+      const sub = word.slice(i, j);
+      if (FORCE_BONUS_WORDS.includes(sub)) continue;
+      if (FULL_DICTIONARY.has(sub) && !COMMON_DICTIONARY.has(sub)){
+        COMMON_DICTIONARY.add(sub);
+        insertWord(COMMON_TRIE_ROOT, sub);
+        added++;
+      }
+    }
+  }
+  return added;
+}
+
 async function loadExtendedCommonWords(){
   if (location.protocol === "file:") return;
   try{
@@ -1735,6 +1758,7 @@ async function loadExtendedCommonWords(){
       }
     }
     added += promotePluralsToCommon();
+    added += promoteTargetWordPartsToCommon(targetWord);
     if (added > 0){
       solvedWords = solveBoard(letters);
       totalCounts = computeCounts(solvedWords);
@@ -1764,7 +1788,8 @@ async function loadFullDictionary(){
         added++;
       }
     }
-    const promoted = promotePluralsToCommon();
+    let promoted = promotePluralsToCommon();
+    promoted += promoteTargetWordPartsToCommon(targetWord);
     if (promoted > 0){
       solvedWords = solveBoard(letters);
       totalCounts = computeCounts(solvedWords);
