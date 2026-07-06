@@ -586,8 +586,8 @@ footer{
   </header>
 
   <div class="mode-toggle">
-    <button class="mode-btn active" id="mode-classic">Classic</button>
-    <button class="mode-btn" id="mode-daily">Daily Puzzle</button>
+    <button class="mode-btn" id="mode-classic">Classic</button>
+    <button class="mode-btn active" id="mode-daily">Daily Puzzle</button>
     <button class="btn secondary" id="new-game-btn" type="button">New Game</button>
   </div>
 
@@ -1502,7 +1502,7 @@ document.getElementById("mode-classic").addEventListener("click", function(){ st
 document.getElementById("mode-daily").addEventListener("click", function(){ startGame("daily"); });
 document.getElementById("new-game-btn").addEventListener("click", function(){ startGame("classic"); });
 
-startGame("classic");
+startGame("daily");
 
 /* Upgrade from the built-in ~2,200-word list to the full Scrabble-legal
    word list (ENABLE1, public domain) in the background. Needs internet;
