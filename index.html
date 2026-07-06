@@ -237,8 +237,8 @@ h1{
 }
 .rotate-btn{
   position:absolute;
-  top:10px;
-  right:10px;
+  top:-22px;
+  right:-22px;
   z-index:20;
   width:38px;
   height:38px;
@@ -421,6 +421,19 @@ h1{
   text-anchor:middle;
   dominant-baseline:middle;
 }
+.bonus-badge{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:linear-gradient(135deg, var(--pink), var(--purple));
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Baloo 2',sans-serif;
+  font-weight:800;
+  font-size:0.85rem;
+}
 .len-col-label{
   font-family:'Baloo 2',sans-serif;
   font-size:0.65rem;
@@ -575,6 +588,7 @@ footer{
   <div class="mode-toggle">
     <button class="mode-btn active" id="mode-classic">Classic</button>
     <button class="mode-btn" id="mode-daily">Daily Puzzle</button>
+    <button class="btn secondary" id="new-game-btn" type="button">New Game</button>
   </div>
 
   <div id="calendar-modal" class="modal-overlay" style="display:none;">
@@ -618,7 +632,7 @@ footer{
 
   <div class="words-section">
     <div class="hints-header">
-      <div class="words-title" style="margin-bottom:0;">Words Found</div>
+      <div class="words-title" id="words-found-title" style="margin-bottom:0;">Words Found</div>
       <button class="btn" id="end-collect-btn-main" type="button" style="display:none;">End &amp; Collect Star &#11088;</button>
     </div>
     <div id="word-board" class="word-board"></div>
@@ -641,7 +655,8 @@ footer{
       <div class="word-def-title">Hint</div>
       <div id="hint-modal-pattern" class="blank-pattern" style="text-align:center;"></div>
       <div id="hint-modal-def" class="word-def-body" style="margin-top:10px;">Loading...</div>
-      <button class="btn" id="hint-modal-close" type="button" style="margin-top:14px;width:100%;">Close</button>
+      <button class="btn secondary" id="hint-reveal-word-btn" type="button" style="margin-top:12px;width:100%;">Reveal full word (0 points)</button>
+      <button class="btn" id="hint-modal-close" type="button" style="margin-top:10px;width:100%;">Close</button>
     </div>
   </div>
 
@@ -653,10 +668,12 @@ footer{
 <script>
 /* ---------- Dictionary ---------- */
 const WORD_STR = "able acid acre act add ado age aged ago ahoy aid aide aim air airy ajar akin ale all ally alto amid amps ancient and anew animal answer ant any ape apex approach apt arc arch are argh arm army art ash ask ate atom aunt away awe axe axle babe back bad bag bail bait bake bald bale ball balm ban band bane bang bank bar barb bard bare barely bark barn base bash bask bass bast bat bath bawl bay bead beak beam bean bear beat beau because become bed bee been beer beet before beg behave behind believe belong below belt bend benefit bent beside best bet beta better beyond bib bicycle bid bide big bike bile bin bind bird bit bite blab blah blanket blot blow blue blur boa boar boat bob body bog boil bold bolt bomb bond bone book boom boon boot border bore boring born boss both bottle bottom bought bounce bout bow bowl box boy brag branch brat breeze brew bridge bright brim bring broken brow bubble buck bucket bud budget buffer bug bulb bulk bull bump bun bundle bunk burden burn bus bush bust busy but button buy cab cake calf call calm calmly came camera camp can cancel candle cane canvas cap cape car card care carpet cart case cash cast castle cat cave caw cent center chairs chance change chap charge chat cheese chew chicken chin chip choice choose chop circle cite city clad clam clan clap claw clay client clip clog closer club clue coal coat cob cod code coffee cog coil coin cold column come comfort common compact company compare compete complex compose con concept concern conduct cone confirm connect consult contact contain content contest context control convert cook cool cop cope copy cord core cork corn corner cost cot cotton county couple course cove cow coy cozy crab crag cram create credit crew crib crisis critic crop crow cry cub cube cue cuff cull cup curb cure curl cush custom cut dab dad dale dam damage dame damp danger dare dark dart dash date dawn day daze dean dear debate debt decide deck deed deem deep deer define defy degree delete deliver dell demand den dent depend design desire detail device dew dial dice did die differ dig dim dime dine dinner dip dire direct dirt disc dish dive dock doctor dodo dog dole doll domain dome don done dorm dose dost dot doth double dour dove down drab drag dragon draw dream driver drop drug drum dry dub duck duct dude due duel duet dug duke dull duly dumb dump dune dupe during dusk dust duty dye each ear earl earn ease easily east easy eat ebb edge edit editor eely effect effort egg ego eighty either elbow element elf elk elm else enable encode end energy engage engine enjoy enough ensure entire envy epic equal era err error escape estate ethnic eve even event ever evil evolve ewe exact exam examine except excess excite exist exit expand expect expert export expose extend eye fabric face fact factor fad fade fail fain fair fake fall fame family famous fan fang far fare farm fast fat fate father fax faze fear feat feature fed fee feed feel feet fell fellow felt fend fern fest feud few fib fiber field fig figure file fill film fin final find fine finger finish fire firm fish fist fit five fix flag flap flat flaw flax flee flew flight flip flit float floor flow flower flu flue fly foal foam focus foe fog foil fold folk follow fond font food fool foot for ford forest forget fork form formal format former fort fortune forward fought foul four fourth fowl fox free freeze french fret friend frog from front fruit fry fuel full fume fun fund funny fur fury fuse fuss future gag gain gait gal gala gale game gang gap gape garden gas gash gasp gate gather gave gay gaze gear gel gem gene gentle germ get ghost gift girl give given glad glee glen glib global glow glue glut gnu goal goat gob god gold golden golf gone gong good goof goon goop gore gory gosh govern gown grab grade grain gram grand grant grasp gray great green grew grey grid grim grin grip grit ground group grow grub guard guess guest guide gulf gulp gum gun gush gust gut guy gym gyro habit had hair hale half hall halo halt ham hand handle hang happen happy harbor hard hardly hare harm harp has hash hat hate haul have hawk hay haze head heal health heap hear heart heat heavy heed heel height heir held hell helm help hem hen her herb herd here hero hew hid hidden hide high hike hill hilt hind hint hip hire his hit hive hoax hoe hog hold holder hole holy home honest honey hood hoof hook hoop hoot hop hope hoping horn horse hose host hot hotel hour house how hub hue hug huge hulk hull hum human humor hungry hunt hunter hurl hurt hush husk hut hymn ice icy idea idle idol ill image imp impact import inch income indeed info injury ink inn inside insist intend into invite ion iris irk iron island itch its itself ivy jab jack jacket jade jail jam jar jaw jay jazz jean jerk jersey jet jig job jog join joke jolt jowl joy joys judge judo jug junior jury just keen keep keg kelp kept key khan kick kid kill kin kind king kingdom kiss kit kitchen kite kiwi knee knew knit knob knot know lab labor lace lack lad ladder lady lag laid lair lake lamb lamp land lane lap lard lark lash last late lately latter laugh launch lava law lawn lay lazy lead leader leaf league leak lean leap learn leather led leek leg legacy lend length lens lent less lesson lest let letter level lick lid lie lied life lift light like limb lime limit limp line link lion lip list listen lit little live living load loaf loan local locate lock lodge loft log logic logo lone lonely long look loom loop loot lord lore lose loss lost lot loud love low lower loyal luck lull lump lung lure lush lust luxe luxury lynx mace mad madam made magi magic maid mail main mainly make male mall malt mama man manage mane manner manual many map maps mare margin mark market mars mask mass mast master mat mate math matter maul maw may maybe mayor mean meant meat medium meek meet melt member memo memory men mend mental mentor menu mere merely mesa mesh mess met method mid middle mighty mild mile milk mill mind mine mineral mint minute mire mirror mist mix mixed moan moat mob mock mode model modern modest mold mole mom moment monk monkey month mood moon moor moot mop moral more moss most mostly moth mother motion motive mount mouse mouth move movie much muck mud muff mug mule mull mum muscle museum mush musk must mute myth nab nag nail name nap nape nation nature navy near nearby nearly neat neck need needle nephew nerve nest net never new news next nib nice nick nil nine nip nod node none nook noon nor norm normal north nose not note notice notion noun novel now nub nude numb number nun nurse nut nuts oak oar oat oath oats obey object obtain occupy occur odd ode odor off offer office oft often oil okay old omen omit once one onion online opal open opt option oral orange orb order ore origin other our out outfit output outside over owe owl own oxygen pace pack packet pact pad page paid pail pain pair pal palace pale palm pan pane panel pang pant par pare parent park part partly pass past pat patent path pause pave paw pay payment pea peak peal pear peas peat peck peel peer peg pelt pen people perfect period permit person pest pet phase phone photo pick picture pie pier pig pike pile pill pilot pin pinch pine pink pint pipe pistol pit pity place plain plan plane planet plant plastic player plea please plenty plot plow plug plum plus ply pocket pod poem poet poetry point pole police policy poll pomp pond pony pool poor pop pope pork port portion pose posh post pot pour pout power practice praise pray prefer prep press pretty prevent prey price pride prince print prior prison prod profit prom promise proof prop proper protect proud prov prove provide prow pry pub public puck puff pug pull pulp pulse puma pump pun punk punt pup pupa pure purple purpose push put putt puzzle quad quail quake qualm quart quarter queen quest quick quiet quill quilt quip quit quite quiz quo quota race rack radio raft rag rage raid rail rain raise rake rally ram ramp ran random rang range rank rant rap rapid rare rarely rash rat rate rather rave raw ray reach read reader ready real ream reap rear reason recall recent record red reduce reef reel reflect reform refuse region rein relax relief rely remain remark remind remote remove render rent repair repeat replace report rescue resist resort rest result retail retain return reveal review reward rib ribbon rice rich rid ride rift rim ring riot rip ripe rise risk rite river road roam roar rob robe rock rocket rod rode role roll roof room root rope rose rosy rot rout route rove row royal rub ruby rude rug ruin rule rum rumor run rung runt rush rust rut ruth rye sack sad safe sag saga sage said sail salt same sample sand sane sang sank sap sash sat save saw say scale scan scar scat scene scheme school scoop score screen script sea seal seam sear search seas season seat second secret sect sector secure seed seek seem seen select self sell send senior sense sent sept sera serf series set settle sew shadow shale shall sham shape share shark sharp she shed sheep sheet shelf shell shift shin shine ship shirt shock shoe shoot shop shore short shot should shout show shrub shun shut shy sick side sight sign signal silent silk silo silver simple simply sin sing single sink sip sir sister sit site six size sketch skew ski skid skill skin skip skull sky slab slam slap slat slaw sled sleek sleep sleet slew slice slid slide slim slip slit slop slot slow slug slum slur sly small smart smell smile smoke smooth smug snag snap snip snob snow soak soap soar sob social sock sod soda sofa soft soil sold soldier sole solid solo solve some son song soon soot sore sorry sort soul sound soup sour source south soy spa space spar spat speak speech speed spell spend spent spin spit sport spot spread spring spry spud spun spur spy square stable stack staff stage stand star start state stay steady steal steam steel stem step stew stick stir stock stone stop store storm story stow strain strand street strict strike strip strong stub stud study stuff stun sty style sub submit such sudden sue suffer suit sulk sum summer summit sun sung sunk sup supply sure surf survey swab swan swap swat sway swim switch swum symbol system tab table tack tad tag tail take tale talent talk tall tame tan tank tap tape tar target tarp task tax tea teach teacher teal team tear tech ted tee teen tell temp temple ten tend tender tennis tent tenth term test text than that thaw the them then theory thick thin thing think third this though threat throat throw thus thy tick ticket tide tidy tie tied tier tile till tilt timber time tin tint tiny tip tissue title toad toast today toe toil toilet told toll tomato tomb ton tone tong tonight too took tool toot top topic tore torn toss tot total touch tough tour tout tow tower town toy toys trace track trade trail train tram trap travel tray treat tree trek trend trial tribe trick trim trip trod trot true trust truth try tub tuba tube tuck tuft tug tulip tuna tune turf turn tusk twelve twenty twig twin two type ugh uncle undo unique unit unless unlike until unto update upon urban urge urn usage use used user usual vale valid value van vane vapor vast vat vault vector vein vendor vent venture verify version very vessel vest vet veto via vial vice victim victor view vine virus visa visit visual void volt volume vote voter vow voyage wade wag wage wagon wail wait wake walk wall walnut wan wand wander want war ward warm warn wart was wash wasp water wave wax way weak wean wear web wed wee weep weight weld well went wept were west wet what wheel when where whey while whim whip whir white whiz who whole whom whose why wick wide wife wig wild will wilt win wind wine wing wink winter wipe wire wisdom wise wish wit with within woe wolf womb won wonder woo wood wool word wore work world worm worn worry worse worst worth wound wow wrap wren writ writer yak yam yap yard yarn yaw yawn yea year yell yelp yes yet yew yield yoga yoke yolk yon you young your yowl yule zag zap zeal zed zero zest zinc zone zoo zoom";
-const DICTIONARY = new Set(WORD_STR.split(" "));
+const COMMON_DICTIONARY = new Set(WORD_STR.split(" "));
+const FULL_DICTIONARY = new Set(COMMON_DICTIONARY);
 const LONG_WORDS = [["misunderstanding", "A failure to interpret someone's words or actions correctly"], ["uncharacteristic", "Not typical of a person's usual behavior"], ["disproportionate", "Too large or too small in relation to something else"], ["unconventionally", "In a way that breaks from what's usual or expected"], ["responsibilities", "Duties or obligations a person is expected to fulfill"], ["characterization", "The way a person or thing is described or portrayed"], ["environmentalist", "Someone who advocates for protecting the natural world"], ["overcompensating", "Making up for a shortcoming to an excessive degree"], ["entrepreneurship", "The activity of starting and running a new business"], ["underappreciated", "Not valued or recognized as much as it deserves"], ["overcomplicating", "Making something more complex than it needs to be"]]; // [[word, hint], ...]
 
-/* ---------- Trie for full-board solving ---------- */
+/* ---------- Trie for full-board solving (built only from COMMON_DICTIONARY, so
+   progress totals reflect an achievable goal rather than the entire Scrabble list) ---------- */
 function insertWord(root, word){
   let node = root;
   for (const ch of word){
@@ -664,8 +681,8 @@ function insertWord(root, word){
   }
   node.isWord = true;
 }
-const TRIE_ROOT = {};
-DICTIONARY.forEach(w => insertWord(TRIE_ROOT, w));
+const COMMON_TRIE_ROOT = {};
+COMMON_DICTIONARY.forEach(w => insertWord(COMMON_TRIE_ROOT, w));
 
 /* ---------- Seeded RNG (mulberry32) ---------- */
 function mulberry32(seed){
@@ -793,20 +810,20 @@ function solveBoard(lettersArr){
     }
   }
   for (let i = 0; i < 16; i++){
-    dfs(i, TRIE_ROOT, "", new Set([i]));
+    dfs(i, COMMON_TRIE_ROOT, "", new Set([i]));
   }
   return results;
 }
 
 function scoreForWord(word){
   const len = word.length;
-  if (len === 3) return 1;
-  if (len === 4) return 2;
-  if (len === 5) return 3;
-  if (len === 6) return 5;
-  if (len === 7) return 8;
-  if (len === 8) return 12;
-  return 20 + (len - 9) * 3;
+  if (len === 3) return 2;
+  if (len === 4) return 3;
+  if (len === 5) return 4;
+  if (len === 6) return 6;
+  if (len === 7) return 9;
+  if (len === 8) return 13;
+  return 21 + (len - 9) * 3;
 }
 
 function todayKey(){
@@ -840,7 +857,11 @@ let solvedWords = new Set();
 let totalCounts = {"3":0,"4":0,"5":0,"6":0,"7":0,"8+":0};
 let hintCredits = 0;
 let hintedWords = new Set();
+let zeroPointWords = new Set();
 let hintRequestInFlight = false;
+let bonusFound = new Set();
+let wordsSinceLastHint = 0;
+let pendingHintWord = null;
 
 const boardEl = document.getElementById("board");
 const tilesGridEl = document.getElementById("tiles-grid");
@@ -850,6 +871,7 @@ const currentWordEl = document.getElementById("current-word");
 const hudScore = document.getElementById("hud-score");
 const hudWords = document.getElementById("hud-words");
 const wordBoardEl = document.getElementById("word-board");
+const wordsFoundTitleEl = document.getElementById("words-found-title");
 const targetBanner = document.getElementById("target-banner");
 const toastEl = document.getElementById("toast");
 const hintCreditsLabel = document.getElementById("hint-credits-label");
@@ -933,14 +955,19 @@ function startGame(newMode, dateKeyOverride){
   document.getElementById("mode-classic").classList.toggle("active", mode === "classic");
   document.getElementById("mode-daily").classList.toggle("active", mode === "daily");
   document.getElementById("calendar-btn").style.display = mode === "daily" ? "inline-block" : "none";
+  document.getElementById("new-game-btn").style.display = mode === "classic" ? "inline-block" : "none";
 
   found = new Set();
+  bonusFound = new Set();
   score = 0;
   path = [];
   targetSolved = false;
   gameEnded = false;
   hintCredits = 0;
   hintedWords = new Set();
+  zeroPointWords = new Set();
+  wordsSinceLastHint = 0;
+  pendingHintWord = null;
 
   if (mode === "daily"){
     currentPuzzleDateKey = dateKeyOverride || todayKey();
@@ -949,8 +976,9 @@ function startGame(newMode, dateKeyOverride){
     letters = built.gridLetters;
     targetWord = built.word;
     targetHint = built.hint;
-    DICTIONARY.add(targetWord);
-    insertWord(TRIE_ROOT, targetWord);
+    COMMON_DICTIONARY.add(targetWord);
+    FULL_DICTIONARY.add(targetWord);
+    insertWord(COMMON_TRIE_ROOT, targetWord);
   } else {
     const rng = mulberry32((Math.random() * Math.pow(2,31)) | 0);
     letters = rollGrid(rng);
@@ -974,7 +1002,7 @@ function startGame(newMode, dateKeyOverride){
 
 function updateHud(){
   hudScore.textContent = score;
-  hudWords.textContent = found.size;
+  hudWords.textContent = found.size + "/" + solvedWords.size;
 }
 
 function updateEndCollectVisibility(){
@@ -1061,8 +1089,8 @@ document.addEventListener("pointercancel", onPointerUp);
 
 function currentPathIsValidWord(word){
   if (word.length < 3) return false;
-  if (found.has(word)) return false; // already claimed - nothing new to signal
-  return DICTIONARY.has(word) || (mode === "daily" && word === targetWord);
+  if (found.has(word) || bonusFound.has(word)) return false; // already claimed - nothing new to signal
+  return FULL_DICTIONARY.has(word) || (mode === "daily" && word === targetWord);
 }
 
 function refreshSelection(){
@@ -1108,26 +1136,50 @@ function drawTrail(isValid){
 function submitPath(){
   const word = path.map(function(idx){ return letters[idx]; }).join("").toLowerCase();
   if (word.length < 3) return;
-  if (found.has(word)){
+  if (found.has(word) || bonusFound.has(word)){
     showToast("Already found");
     return;
   }
-  if (!DICTIONARY.has(word)){
+  const isCommon = COMMON_DICTIONARY.has(word);
+  const isExtra = !isCommon && FULL_DICTIONARY.has(word);
+  if (!isCommon && !isExtra){
     showToast("Not in word list");
     return;
   }
-  found.add(word);
-  const isBonus = mode === "daily" && targetWord && word === targetWord;
-  const pts = scoreForWord(word);
-  score += pts;
-  hintCredits += 1;
-  renderWordBoard();
-  updateHintCreditsLabel();
-  updateHud();
-  showWordPopup(isBonus ? "LEGENDARY!" : praiseForLength(word.length), "+" + pts);
-  playFoundSound(isBonus);
 
-  if (isBonus && !targetSolved){
+  const isDailyTarget = mode === "daily" && targetWord && word === targetWord;
+  let pts = isCommon ? scoreForWord(word) : 1;
+
+  if (zeroPointWords.has(word)){
+    pts = 0;
+  } else if (hintedWords.has(word)){
+    pts = Math.max(pts - 1, 0);
+  }
+
+  if (isCommon){
+    found.add(word);
+  } else {
+    bonusFound.add(word);
+  }
+  score += pts;
+
+  wordsSinceLastHint += 1;
+  if (wordsSinceLastHint >= 3){
+    wordsSinceLastHint = 0;
+    hintCredits += 1;
+  }
+  updateHintCreditsLabel();
+
+  if (pendingHintWord === word){
+    pendingHintWord = null;
+  }
+
+  renderWordBoard();
+  updateHud();
+  showWordPopup(isDailyTarget ? "LEGENDARY!" : (isExtra ? "Bonus!" : praiseForLength(word.length)), "+" + pts);
+  playFoundSound(isDailyTarget);
+
+  if (isDailyTarget && !targetSolved){
     targetSolved = true;
     updateEndCollectVisibility();
     renderTargetBanner();
@@ -1171,8 +1223,44 @@ function nextHintCandidate(){
   return candidates.length ? candidates[0] : null;
 }
 
+async function fetchDefinitionWithRetry(word){
+  for (let attempt = 0; attempt < 2; attempt++){
+    try{
+      const res = await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word));
+      if (!res.ok) throw new Error("no definition");
+      const data = await res.json();
+      const meanings = data[0] && data[0].meanings;
+      const def = meanings && meanings[0] && meanings[0].definitions && meanings[0].definitions[0] && meanings[0].definitions[0].definition;
+      return def || ("A " + word.length + "-letter word on this board.");
+    } catch (err) {
+      if (attempt === 0) await new Promise(function(r){ setTimeout(r, 500); });
+    }
+  }
+  return "Couldn't fetch a definition right now (needs internet access) - but it's a " + word.length + "-letter word on this board.";
+}
+
+function showHintModal(word){
+  const modal = document.getElementById("hint-modal");
+  const patternEl = document.getElementById("hint-modal-pattern");
+  const defEl = document.getElementById("hint-modal-def");
+  const revealed = zeroPointWords.has(word);
+  const pattern = revealed
+    ? word.toUpperCase() + " (" + word.length + ")"
+    : word.split("").map(function(ch, i){ return i === 0 ? ch.toUpperCase() : "_"; }).join(" ") + " (" + word.length + ")";
+  patternEl.textContent = pattern;
+  defEl.textContent = definitionCache.has(word) ? definitionCache.get(word) : "Looking up definition...";
+  modal.style.display = "flex";
+}
+
 async function requestHint(){
   if (hintRequestInFlight) return;
+
+  if (pendingHintWord && !found.has(pendingHintWord)){
+    showToast("Find your current hint's word before revealing another");
+    showHintModal(pendingHintWord);
+    return;
+  }
+
   if (hintCredits <= 0){
     showToast("Find a word to earn a hint");
     return;
@@ -1185,25 +1273,14 @@ async function requestHint(){
   hintCredits -= 1;
   updateHintCreditsLabel();
   hintedWords.add(word);
+  pendingHintWord = word;
   hintRequestInFlight = true;
 
-  const modal = document.getElementById("hint-modal");
-  const patternEl = document.getElementById("hint-modal-pattern");
-  const defEl = document.getElementById("hint-modal-def");
-  const pattern = word.split("").map(function(ch, i){ return i === 0 ? ch.toUpperCase() : "_"; }).join(" ");
-  patternEl.textContent = pattern + " (" + word.length + ")";
-  defEl.textContent = "Looking up definition...";
-  modal.style.display = "flex";
-
-  try{
-    const res = await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word));
-    if (!res.ok) throw new Error("no definition");
-    const data = await res.json();
-    const meanings = data[0] && data[0].meanings;
-    const def = meanings && meanings[0] && meanings[0].definitions && meanings[0].definitions[0] && meanings[0].definitions[0].definition;
-    defEl.textContent = def || ("A " + word.length + "-letter word on this board.");
-  } catch (err) {
-    defEl.textContent = "Couldn't fetch a definition right now (needs internet access) - but it's a " + word.length + "-letter word on this board.";
+  showHintModal(word);
+  const def = await fetchDefinitionWithRetry(word);
+  definitionCache.set(word, def);
+  if (pendingHintWord === word){
+    document.getElementById("hint-modal-def").textContent = def;
   }
   hintRequestInFlight = false;
 }
@@ -1214,11 +1291,18 @@ document.getElementById("hint-modal-close").addEventListener("click", function()
 document.getElementById("hint-modal").addEventListener("click", function(e){
   if (e.target.id === "hint-modal") document.getElementById("hint-modal").style.display = "none";
 });
+document.getElementById("hint-reveal-word-btn").addEventListener("click", function(){
+  if (!pendingHintWord) return;
+  zeroPointWords.add(pendingHintWord);
+  document.getElementById("hint-modal-pattern").textContent = pendingHintWord.toUpperCase() + " (" + pendingHintWord.length + ")";
+});
 
 const BUCKET_COLORS = {"3":"#ff5c8d","4":"#ff9f43","5":"#ffd93d","6":"#4ecb71","7":"#4d96ff","8+":"#a06bff"};
 const BUCKET_CIRCUMFERENCE = 99.9; // circumference trick for r=15.9 donut
 
 function renderWordBoard(){
+  wordsFoundTitleEl.textContent = "Words Found " + found.size + "/" + solvedWords.size;
+
   const buckets = ["3","4","5","6","7","8+"];
   const foundByBucket = {};
   buckets.forEach(function(b){ foundByBucket[b] = []; });
@@ -1226,12 +1310,12 @@ function renderWordBoard(){
 
   const activeBuckets = buckets.filter(function(b){ return (totalCounts[b] || 0) > 0; });
 
-  if (activeBuckets.length === 0){
+  if (activeBuckets.length === 0 && bonusFound.size === 0){
     wordBoardEl.innerHTML = "<span class='empty-note'>Drag across adjacent letters to spell a word - 3 letters minimum.</span>";
     return;
   }
 
-  wordBoardEl.innerHTML = activeBuckets.map(function(b){
+  let html = activeBuckets.map(function(b){
     const total = totalCounts[b] || 0;
     const gotWords = foundByBucket[b].slice().sort();
     const got = gotWords.length;
@@ -1257,6 +1341,19 @@ function renderWordBoard(){
       "<div class='len-col-words'>" + items + "</div>" +
     "</div>";
   }).join("");
+
+  if (bonusFound.size > 0){
+    const bonusItems = Array.from(bonusFound).sort().map(function(w){
+      return "<button type='button' class='chip bonus' data-word='" + w + "'>" + w.toUpperCase() + "</button>";
+    }).join("");
+    html += "<div class='len-col'>" +
+      "<div class='bonus-badge'>+1</div>" +
+      "<div class='len-col-label'>Bonus</div>" +
+      "<div class='len-col-words'>" + bonusItems + "</div>" +
+    "</div>";
+  }
+
+  wordBoardEl.innerHTML = html;
 }
 
 wordBoardEl.addEventListener("click", function(e){
@@ -1403,6 +1500,7 @@ document.getElementById("cal-next").addEventListener("click", function(){
 
 document.getElementById("mode-classic").addEventListener("click", function(){ startGame("classic"); });
 document.getElementById("mode-daily").addEventListener("click", function(){ startGame("daily"); });
+document.getElementById("new-game-btn").addEventListener("click", function(){ startGame("classic"); });
 
 startGame("classic");
 
@@ -1433,7 +1531,7 @@ async function fetchFirstAvailable(urls){
 async function loadFullDictionary(){
   if (location.protocol === "file:"){
     console.warn("Tumbleword: running from a local file:// path. Most browsers block fetching remote files from a page opened this way, so the full Scrabble word list can't load. The built-in ~2,200-word list still works fully offline. To get the full list, host this file (e.g. GitHub Pages, Netlify) or serve it from a local web server instead of double-clicking it.");
-    showToast("Using the built-in word list (full list needs the page to be hosted, not opened as a file)");
+    showToast("Using the built-in word list (bonus words need the page to be hosted, not opened as a file)");
     return;
   }
   try{
@@ -1442,19 +1540,14 @@ async function loadFullDictionary(){
     let added = 0;
     for (let i = 0; i < words.length; i++){
       const w = words[i].trim().toLowerCase();
-      if (w.length >= 3 && w.length <= 16 && /^[a-z]+$/.test(w) && !DICTIONARY.has(w)){
-        DICTIONARY.add(w);
-        insertWord(TRIE_ROOT, w);
+      if (w.length >= 3 && w.length <= 16 && /^[a-z]+$/.test(w) && !FULL_DICTIONARY.has(w)){
+        FULL_DICTIONARY.add(w);
         added++;
       }
     }
-    solvedWords = solveBoard(letters);
-    totalCounts = computeCounts(solvedWords);
-    renderWordBoard();
-    showToast("Full Scrabble word list loaded (+" + added + " words)");
+    showToast("+" + added + " bonus words unlocked (1 point each)");
   } catch (err) {
-    console.warn("Could not load the full Scrabble word list; using the built-in common word list instead.", err);
-    showToast("Couldn't reach the full word list - playing with the built-in list instead");
+    console.warn("Could not load the extra bonus word list; common words still work fully.", err);
   }
 }
 loadFullDictionary();
