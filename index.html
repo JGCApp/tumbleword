@@ -120,11 +120,15 @@ h1{
 }
 .blank-pattern{
   font-family:'Courier New',monospace;
-  letter-spacing:4px;
-  font-size:1.15rem;
+  letter-spacing:2px;
+  font-size:1rem;
   margin:8px 0;
   color:var(--ink);
   font-weight:700;
+  white-space:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding-bottom:2px;
 }
 .hint-btn{
   font-size:0.72rem !important;
@@ -314,6 +318,10 @@ h1{
   box-shadow:0 0 0 4px var(--green), 0 0 18px 4px rgba(78,203,113,0.7);
   transform:rotate(var(--counter-rotate)) scale(1.1);
 }
+.tile.selected.bonus-drag{
+  box-shadow:0 0 0 4px var(--pink), 0 0 18px 4px rgba(255,92,141,0.7);
+  transform:rotate(var(--counter-rotate)) scale(1.1);
+}
 .tile .qu{font-size:1.4rem;}
 
 .current-word{
@@ -329,6 +337,7 @@ h1{
   transition:color .1s ease;
 }
 .current-word.valid{color:var(--green);}
+.current-word.bonus-drag{color:var(--pink);}
 
 .actions{
   display:flex;
@@ -1171,37 +1180,42 @@ document.addEventListener("pointermove", function(e){
 document.addEventListener("pointerup", onPointerUp);
 document.addEventListener("pointercancel", onPointerUp);
 
-function currentPathIsValidWord(word){
-  if (word.length < 3) return false;
-  if (found.has(word) || bonusFound.has(word)) return false; // already claimed - nothing new to signal
-  return FULL_DICTIONARY.has(word) || (mode === "daily" && word === targetWord);
+function getWordStatus(word){
+  if (word.length < 3) return "invalid";
+  if (found.has(word) || bonusFound.has(word)) return "invalid"; // already claimed - nothing new to signal
+  if (mode === "daily" && word === targetWord) return "common";
+  if (COMMON_DICTIONARY.has(word)) return "common";
+  if (FULL_DICTIONARY.has(word)) return "bonus";
+  return "invalid";
 }
 
 function refreshSelection(){
   const els = tileEls();
-  els.forEach(function(el){ el.classList.remove("selected", "valid"); });
+  els.forEach(function(el){ el.classList.remove("selected", "valid", "bonus-drag"); });
   let word = "";
   path.forEach(function(idx){
     word += letters[idx];
   });
   const lower = word.toLowerCase();
-  const isValid = currentPathIsValidWord(lower);
+  const status = getWordStatus(lower);
   path.forEach(function(idx){
     const el = els[idx];
     el.classList.add("selected");
-    if (isValid) el.classList.add("valid");
+    if (status === "common") el.classList.add("valid");
+    else if (status === "bonus") el.classList.add("bonus-drag");
   });
   currentWordEl.textContent = word || "\u00A0";
-  currentWordEl.classList.toggle("valid", isValid);
-  drawTrail(isValid);
+  currentWordEl.classList.toggle("valid", status === "common");
+  currentWordEl.classList.toggle("bonus-drag", status === "bonus");
+  drawTrail(status);
 }
 
-function drawTrail(isValid){
+function drawTrail(status){
   if (path.length < 2){
     trailSvg.innerHTML = "";
     return;
   }
-  const color = isValid ? "#4f9c82" : "#d4a84b";
+  const color = status === "common" ? "#4f9c82" : status === "bonus" ? "#ff5c8d" : "#d4a84b";
   const svgRect = trailSvg.getBoundingClientRect();
   trailSvg.setAttribute("viewBox", "0 0 " + svgRect.width + " " + svgRect.height);
   const els = tileEls();
@@ -1610,6 +1624,15 @@ const DICTIONARY_SOURCES = [
   "https://raw.githubusercontent.com/dolph/dictionary/master/enable1.txt"
 ];
 
+/* A frequency-ranked list of the 10,000 most common English words (Google's
+   Trillion Word Corpus, MIT/fair-use licensed via first20hours/google-10000-english).
+   This is what actually fixes "too many words count as bonus" - it's a much
+   better judge of what's genuinely common than any hand-typed list can be. */
+const COMMON_WORDLIST_SOURCES = [
+  "https://cdn.jsdelivr.net/gh/first20hours/google-10000-english@master/google-10000-english-no-swears.txt",
+  "https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-no-swears.txt"
+];
+
 async function fetchFirstAvailable(urls){
   let lastErr = null;
   for (const url of urls){
@@ -1623,6 +1646,33 @@ async function fetchFirstAvailable(urls){
   }
   throw lastErr || new Error("all sources failed");
 }
+
+async function loadExtendedCommonWords(){
+  if (location.protocol === "file:") return;
+  try{
+    const text = await fetchFirstAvailable(COMMON_WORDLIST_SOURCES);
+    const words = text.split(/\s+/);
+    let added = 0;
+    for (let i = 0; i < words.length; i++){
+      const w = words[i].trim().toLowerCase();
+      if (w.length >= 3 && w.length <= 16 && /^[a-z]+$/.test(w) && !COMMON_DICTIONARY.has(w)){
+        COMMON_DICTIONARY.add(w);
+        FULL_DICTIONARY.add(w);
+        insertWord(COMMON_TRIE_ROOT, w);
+        added++;
+      }
+    }
+    if (added > 0){
+      solvedWords = solveBoard(letters);
+      totalCounts = computeCounts(solvedWords);
+      renderWordBoard();
+      showToast(added + " more common words unlocked as goals");
+    }
+  } catch (err) {
+    console.warn("Could not load the extended common word list; the built-in common list still works fully.", err);
+  }
+}
+loadExtendedCommonWords();
 
 async function loadFullDictionary(){
   if (location.protocol === "file:"){
