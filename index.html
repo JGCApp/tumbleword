@@ -257,6 +257,24 @@ h1{
   transition:transform .5s cubic-bezier(.4,0,.2,1);
 }
 .rotate-btn:active{transform:scale(0.9);}
+.sound-toggle-btn{
+  position:absolute;
+  top:-22px;
+  left:-22px;
+  z-index:20;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:none;
+  background:var(--card);
+  color:var(--purple);
+  font-size:1.1rem;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,0.25);
+  transition:transform .15s ease;
+}
+.sound-toggle-btn:active{transform:scale(0.9);}
 #trail-svg{
   position:absolute;
   top:16px;left:16px;right:16px;bottom:16px;
@@ -636,6 +654,7 @@ footer{
 
   <div id="board">
     <button id="rotate-btn" class="rotate-btn" type="button" title="Rotate the board for a new perspective">&#8635;</button>
+    <button id="sound-toggle-btn" class="sound-toggle-btn" type="button" title="Mute sound">&#128266;</button>
     <div id="tiles-grid"></div>
     <svg id="trail-svg"></svg>
     <div id="board-popup" class="board-popup"></div>
@@ -1298,7 +1317,26 @@ function submitPath(){
   saveGameState();
 }
 
+let soundEnabled = true;
+try{
+  soundEnabled = localStorage.getItem("tumbleword_sound") !== "off";
+} catch (err) { /* storage unavailable, default to on */ }
+
+function updateSoundToggleUI(){
+  const btn = document.getElementById("sound-toggle-btn");
+  btn.innerHTML = soundEnabled ? "&#128266;" : "&#128263;";
+  btn.title = soundEnabled ? "Mute sound" : "Unmute sound";
+}
+document.getElementById("sound-toggle-btn").addEventListener("click", function(){
+  soundEnabled = !soundEnabled;
+  try{ localStorage.setItem("tumbleword_sound", soundEnabled ? "on" : "off"); } catch (err) { /* ignore */ }
+  updateSoundToggleUI();
+  if (soundEnabled) playFoundSound(false);
+});
+updateSoundToggleUI();
+
 function playFoundSound(isBonus){
+  if (!soundEnabled) return;
   try{
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
@@ -1342,8 +1380,11 @@ async function fetchDefinitionWithRetry(word){
       if (!res.ok) throw new Error("no definition");
       const data = await res.json();
       const meanings = data[0] && data[0].meanings;
-      const def = meanings && meanings[0] && meanings[0].definitions && meanings[0].definitions[0] && meanings[0].definitions[0].definition;
-      return def || ("A " + word.length + "-letter word on this board.");
+      const meaning = meanings && meanings[0];
+      const def = meaning && meaning.definitions && meaning.definitions[0] && meaning.definitions[0].definition;
+      const pos = meaning && meaning.partOfSpeech;
+      if (!def) return "A " + word.length + "-letter word on this board.";
+      return pos ? "(" + pos + ") " + def : def;
     } catch (err) {
       if (attempt === 0) await new Promise(function(r){ setTimeout(r, 500); });
     }
@@ -1493,8 +1534,10 @@ async function showWordDefinition(word){
     if (!res.ok) throw new Error("no definition");
     const data = await res.json();
     const meanings = data[0] && data[0].meanings;
-    const def = meanings && meanings[0] && meanings[0].definitions && meanings[0].definitions[0] && meanings[0].definitions[0].definition;
-    const text = def || ("A " + word.length + "-letter word found on this board.");
+    const meaning = meanings && meanings[0];
+    const def = meaning && meaning.definitions && meaning.definitions[0] && meaning.definitions[0].definition;
+    const pos = meaning && meaning.partOfSpeech;
+    const text = def ? (pos ? "(" + pos + ") " + def : def) : ("A " + word.length + "-letter word found on this board.");
     definitionCache.set(word, text);
     bodyEl.textContent = text;
   } catch (err) {
